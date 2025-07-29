@@ -1,0 +1,100 @@
+[
+  {
+    "id": "wohnpark-am-see",
+    "name": "Wohnpark am See",
+    "location": "Musterstadt",
+    "status": "verfügbar",
+    "description": "Moderne Eigentumswohnungen in ruhiger Seelage mit hochwertiger Ausstattung und direktem Wasserzugang.",
+    "priceFrom": "425.000",
+    "images": [
+      "/images/placeholder-1.jpg",
+      "/images/placeholder-2.jpg",
+      "/images/placeholder-3.jpg"
+    ],
+    "details": {
+      "livingSpace": "85-120 m²",
+      "rooms": "3-4 Zimmer",
+      "price": "ab 425.000 €",
+      "completion": "Q3 2024"
+    },
+    "floorPlan": "/images/grundriss-1.jpg"
+  },
+  {
+    "id": "villa-sonnenhang",
+    "name": "Villa Sonnenhang",
+    "location": "Bergstadt",
+    "status": "verkauft",
+    "description": "Exklusive Einfamilienhäuser in Hanglage mit Panoramablick und architektonischem Anspruch.",
+    "priceFrom": "850.000",
+    "images": [
+      "/images/placeholder-4.jpg",
+      "/images/placeholder-5.jpg"
+    ],
+    "details": {
+      "livingSpace": "180-220 m²",
+      "rooms": "5-6 Zimmer",
+      "price": "ab 850.000 €",
+      "completion": "Q4 2023"
+    },
+    "floorPlan": "/images/grundriss-2.jpg"
+  },
+  {
+    "id": "stadtquartier-mitte",
+    "name": "Stadtquartier Mitte",
+    "location": "Zentrum",
+    "status": "verfügbar",
+    "description": "Urbanes Wohnen im Herzen der Stadt mit moderner Architektur und optimaler Infrastruktur.",
+    "priceFrom": "320.000",
+    "images": [
+      "/images/placeholder-6.jpg",
+      "/images/placeholder-7.jpg",
+      "/images/placeholder-8.jpg"
+    ],
+    "details": {
+      "livingSpace": "65-95 m²",
+      "rooms": "2-3 Zimmer",
+      "price": "ab 320.000 €",
+      "completion": "Q2 2024"
+    },
+    "floorPlan": "/images/grundriss-3.jpg"
+  },
+  {
+    "id": "gartenresidenz",
+    "name": "Gartenresidenz",
+    "location": "Grünstadt",
+    "status": "verkauft",
+    "description": "Ruhiges Wohnen im Grünen mit großzügigen Gärten und nachhaltiger Bauweise.",
+    "priceFrom": "560.000",
+    "images": [
+      "/images/placeholder-9.jpg",
+      "/images/placeholder-10.jpg"
+    ],
+    "details": {
+      "livingSpace": "110-140 m²",
+      "rooms": "4-5 Zimmer",
+      "price": "ab 560.000 €",
+      "completion": "Q1 2023"
+    },
+    "floorPlan": "/images/grundriss-4.jpg"
+  },
+  {
+    "id": "penthouse-tower",
+    "name": "Penthouse Tower",
+    "location": "Skyline District",
+    "status": "verfügbar",
+    "description": "Luxuriöse Penthouse-Wohnungen mit Dachterrasse und 360-Grad-Blick über die Stadt.",
+    "priceFrom": "1.200.000",
+    "images": [
+      "/images/placeholder-11.jpg",
+      "/images/placeholder-12.jpg",
+      "/images/placeholder-13.jpg"
+    ],
+    "details": {
+      "livingSpace": "150-200 m²",
+      "rooms": "4-5 Zimmer",
+      "price": "ab 1.200.000 €",
+      "completion": "Q1 2025"
+    },
+    "floorPlan": "/images/grundriss-5.jpg"
+  }
+]
