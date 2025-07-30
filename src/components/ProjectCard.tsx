@@ -7,7 +7,16 @@ interface Project {
   status: 'verfügbar' | 'verkauft'
   description: string
   priceFrom: string
+  year: number
+  category: string
   images: string[]
+  details: {
+    livingSpace: string
+    rooms: string
+    price: string
+    completion: string
+  }
+  floorPlan?: string
 }
 
 interface ProjectCardProps {
