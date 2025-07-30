@@ -7,8 +7,8 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project }: ProjectCardProps) {
   return (
-    <div className="bg-white border border-stone-200 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
-      <div className="aspect-[4/3] bg-stone-100 flex items-center justify-center">
+    <article className="bg-white border border-stone-200 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
+      <div className="aspect-[4/3] bg-stone-100 flex items-center justify-center" role="img" aria-label={`Projektbild für ${project.name}`}>
         <span className="text-stone-400 text-sm sm:text-base">Projekt Bild</span>
       </div>
       
@@ -38,12 +38,13 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </p>
           <Link
             href={`/projekte/${project.id}`}
-            className="text-amber-600 hover:text-amber-700 transition-colors font-medium text-sm sm:text-base self-start sm:self-auto"
+            className="text-amber-600 hover:text-amber-700 transition-colors font-medium text-sm sm:text-base self-start sm:self-auto focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 rounded-sm"
+            aria-label={`Details zu ${project.name} ansehen`}
           >
             Details ansehen →
           </Link>
         </div>
       </div>
-    </div>
+    </article>
   )
 }

@@ -2,7 +2,7 @@ import Image from 'next/image'
 
 export default function Footer() {
   return (
-    <footer className="bg-stone-100 border-t border-stone-200">
+    <footer className="bg-stone-100 border-t border-stone-200" role="contentinfo">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Footer Content - Mobile First */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
@@ -24,24 +24,29 @@ export default function Footer() {
           
           <div>
             <h4 className="text-base sm:text-lg font-medium text-stone-800 mb-3 sm:mb-4">Kontakt</h4>
-            <div className="space-y-1 sm:space-y-2 text-stone-600 text-sm sm:text-base">
+            <address className="space-y-1 sm:space-y-2 text-stone-600 text-sm sm:text-base not-italic">
               <p>NAMLA GmbH</p>
               <p>Zeitblomstr. 31/2</p>
               <p>89073 Ulm</p>
-              <p><a href="mailto:info@namla.de" className="hover:text-stone-800 transition-colors">info@namla.de</a></p>
-            </div>
+              <p><a href="mailto:info@namla.de" className="hover:text-stone-800 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 rounded-sm" aria-label="E-Mail an NAMLA senden">info@namla.de</a></p>
+            </address>
           </div>
           
           <div>
             <h4 className="text-base sm:text-lg font-medium text-stone-800 mb-3 sm:mb-4">Links</h4>
-            <div className="space-y-1 sm:space-y-2">
-              <a href="/impressum" className="block text-stone-600 hover:text-stone-800 transition-colors text-sm sm:text-base">
-                Impressum
-              </a>
-              <a href="/datenschutz" className="block text-stone-600 hover:text-stone-800 transition-colors text-sm sm:text-base">
-                Datenschutz
-              </a>
-            </div>
+            <nav aria-label="Footer-Navigation">
+              <div className="space-y-1 sm:space-y-2">
+                <a href="/impressum" className="block text-stone-600 hover:text-stone-800 transition-colors text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 rounded-sm">
+                  Impressum
+                </a>
+                <a href="/datenschutz" className="block text-stone-600 hover:text-stone-800 transition-colors text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 rounded-sm">
+                  Datenschutz
+                </a>
+                <a href="/barrierefreiheit" className="block text-stone-600 hover:text-stone-800 transition-colors text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 rounded-sm">
+                  Barrierefreiheit
+                </a>
+              </div>
+            </nav>
           </div>
         </div>
         
