@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import { Project } from '@/types/project'
+import { CurrentProject } from '@/types/project'
 
 interface ProjectCardProps {
-  project: Project
+  project: CurrentProject
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {

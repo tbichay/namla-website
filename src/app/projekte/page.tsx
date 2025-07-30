@@ -1,16 +1,16 @@
 'use client'
 
 import ProjectCard from '@/components/ProjectCard'
-import TimelineProject from '@/components/TimelineProject'
-import { Project } from '@/types/project'
+import HistoricalTimelineCard from '@/components/HistoricalTimelineCard'
+import { Project, isCurrentProject, isHistoricalProject } from '@/types/project'
 import projectsData from '@/data/projects.json'
 
 export default function ProjectsPage() {
   // Type cast and separate current and historical projects
   const projects = projectsData as Project[]
-  const currentProjects = projects.filter(project => project.category === 'current')
+  const currentProjects = projects.filter(isCurrentProject)
   const historicalProjects = projects
-    .filter(project => project.category === 'historical')
+    .filter(isHistoricalProject)
     .sort((a, b) => b.year - a.year) // Sort from newest to oldest (2024→1998)
 
   return (
@@ -78,7 +78,7 @@ export default function ProjectsPage() {
               >
                 <div className="flex space-x-6 px-4" style={{ width: 'max-content' }}>
                   {historicalProjects.map((project, index) => (
-                    <TimelineProject 
+                    <HistoricalTimelineCard 
                       key={project.id} 
                       project={project} 
                       index={index}

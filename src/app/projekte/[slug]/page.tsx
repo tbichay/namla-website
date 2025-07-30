@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import ImageSlider from '@/components/ImageSlider'
 import Button from '@/components/ui/Button'
-import { Project } from '@/types/project'
+import { Project, isCurrentProject, isHistoricalProject } from '@/types/project'
 import projectsData from '@/data/projects.json'
 
 interface ProjectDetailPageProps {
@@ -43,17 +43,25 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 {project.name}
               </h1>
               <p className="text-base sm:text-lg lg:text-xl text-stone-600">{project.location}</p>
+              <p className="text-sm text-stone-500 mt-1">Fertigstellung: {project.year}</p>
             </div>
             <div className="px-2 sm:px-0">
-              <span
-                className={`inline-block px-3 sm:px-4 py-2 text-sm sm:text-base lg:text-lg font-medium rounded-full ${
-                  project.status === 'verfügbar'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-stone-100 text-stone-600'
-                }`}
-              >
-                {project.status}
-              </span>
+              {isCurrentProject(project) && (
+                <span
+                  className={`inline-block px-3 sm:px-4 py-2 text-sm sm:text-base lg:text-lg font-medium rounded-full ${
+                    project.status === 'verfügbar'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-stone-100 text-stone-600'
+                  }`}
+                >
+                  {project.status}
+                </span>
+              )}
+              {isHistoricalProject(project) && (
+                <span className="inline-block px-3 sm:px-4 py-2 text-sm sm:text-base lg:text-lg font-medium rounded-full bg-stone-100 text-stone-600">
+                  {project.units} Wohneinheiten
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -64,23 +72,40 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           <div className="lg:col-span-2 order-2 lg:order-1">
             <ImageSlider images={project.images} projectName={project.name} />
             
-            <div className="mt-6 sm:mt-8 px-2 sm:px-0">
-              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 mb-4">Beschreibung</h2>
-              <p className="text-stone-600 leading-relaxed text-sm sm:text-base lg:text-lg">
-                {project.description}
-              </p>
-            </div>
+            {/* Current Project Description & Floor Plan */}
+            {isCurrentProject(project) && (
+              <>
+                <div className="mt-6 sm:mt-8 px-2 sm:px-0">
+                  <h2 className="text-xl sm:text-2xl font-bold text-stone-800 mb-4">Beschreibung</h2>
+                  <p className="text-stone-600 leading-relaxed text-sm sm:text-base lg:text-lg">
+                    {project.description}
+                  </p>
+                </div>
 
-            {project.floorPlan && (
-              <div className="mt-8 sm:mt-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-bold text-stone-800 mb-4">Grundriss</h2>
-                <div className="aspect-[4/3] bg-white rounded-lg shadow-sm overflow-hidden relative">
-                  <Image
-                    src={project.floorPlan}
-                    alt={`${project.name} - Grundriss`}
-                    fill
-                    className="object-contain"
-                  />
+                {project.floorPlan && (
+                  <div className="mt-8 sm:mt-12 px-2 sm:px-0">
+                    <h2 className="text-xl sm:text-2xl font-bold text-stone-800 mb-4">Grundriss</h2>
+                    <div className="aspect-[4/3] bg-white rounded-lg shadow-sm overflow-hidden relative">
+                      <Image
+                        src={project.floorPlan}
+                        alt={`${project.name} - Grundriss`}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Historical Project - Gallery Only */}
+            {isHistoricalProject(project) && (
+              <div className="mt-6 sm:mt-8 px-2 sm:px-0">
+                <div className="text-center p-6 bg-stone-100 rounded-lg">
+                  <p className="text-stone-600 text-sm">
+                    Dieses Projekt wurde {project.year} erfolgreich realisiert und ist Teil unserer 
+                    umfangreichen Bauerfahrung in der Region Ulm.
+                  </p>
                 </div>
               </div>
             )}
@@ -89,36 +114,69 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           {/* Sidebar */}
           <div className="lg:col-span-1 order-1 lg:order-2">
             <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mx-2 sm:mx-0">
-              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 mb-4 sm:mb-6">Details</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-800 mb-4 sm:mb-6">
+                {isCurrentProject(project) ? 'Details' : 'Projektinfo'}
+              </h2>
               
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
-                  <span className="text-stone-500">Wohnfläche</span>
-                  <span className="font-medium text-stone-800">{project.details.livingSpace}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
-                  <span className="text-stone-500">Zimmer</span>
-                  <span className="font-medium text-stone-800">{project.details.rooms}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
-                  <span className="text-stone-500">Preis</span>
-                  <span className="font-medium text-stone-800">{project.details.price}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
-                  <span className="text-stone-500">Fertigstellung</span>
-                  <span className="font-medium text-stone-800">{project.details.completion}</span>
-                </div>
-                <div className="flex justify-between py-2 text-sm sm:text-base">
-                  <span className="text-stone-500">Status</span>
-                  <span className="font-medium text-stone-800 capitalize">{project.status}</span>
-                </div>
-              </div>
+              {/* Current Project Details */}
+              {isCurrentProject(project) && (
+                <>
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                      <span className="text-stone-500">Wohnfläche</span>
+                      <span className="font-medium text-stone-800">{project.details.livingSpace}</span>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                      <span className="text-stone-500">Zimmer</span>
+                      <span className="font-medium text-stone-800">{project.details.rooms}</span>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                      <span className="text-stone-500">Preis</span>
+                      <span className="font-medium text-stone-800">{project.details.price}</span>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                      <span className="text-stone-500">Fertigstellung</span>
+                      <span className="font-medium text-stone-800">{project.details.completion}</span>
+                    </div>
+                    <div className="flex justify-between py-2 text-sm sm:text-base">
+                      <span className="text-stone-500">Status</span>
+                      <span className="font-medium text-stone-800 capitalize">{project.status}</span>
+                    </div>
+                  </div>
 
-              <div className="mt-6 sm:mt-8">
-                <Button href="/kontakt" className="w-full text-center">
-                  Jetzt anfragen
-                </Button>
-              </div>
+                  <div className="mt-6 sm:mt-8">
+                    <Button href="/kontakt" className="w-full text-center">
+                      Jetzt anfragen
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {/* Historical Project Info */}
+              {isHistoricalProject(project) && (
+                <>
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                      <span className="text-stone-500">Fertigstellung</span>
+                      <span className="font-medium text-stone-800">{project.year}</span>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                      <span className="text-stone-500">Wohneinheiten</span>
+                      <span className="font-medium text-stone-800">{project.units}</span>
+                    </div>
+                    <div className="flex justify-between py-2 text-sm sm:text-base">
+                      <span className="text-stone-500">Status</span>
+                      <span className="font-medium text-stone-800">Erfolgreich realisiert</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 sm:mt-8 p-4 bg-stone-50 rounded-lg">
+                    <p className="text-sm text-stone-600 text-center">
+                      Teil unserer erfolgreichen Projektgeschichte seit 1998.
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
