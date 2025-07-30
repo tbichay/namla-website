@@ -1,23 +1,5 @@
 import Link from 'next/link'
-
-interface Project {
-  id: string
-  name: string
-  location: string
-  status: 'verfügbar' | 'verkauft'
-  description: string
-  priceFrom: string
-  year: number
-  category: string
-  images: string[]
-  details: {
-    livingSpace: string
-    rooms: string
-    price: string
-    completion: string
-  }
-  floorPlan?: string
-}
+import { Project } from '@/types/project'
 
 interface ProjectCardProps {
   project: Project

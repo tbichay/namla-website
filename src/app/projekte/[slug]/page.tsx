@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import ImageSlider from '@/components/ImageSlider'
 import Button from '@/components/ui/Button'
+import { Project } from '@/types/project'
 import projectsData from '@/data/projects.json'
 
 interface ProjectDetailPageProps {
@@ -16,7 +17,8 @@ interface ProjectDetailPageProps {
 
 export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { slug } = use(params)
-  const project = projectsData.find(p => p.id === slug)
+  const projects = projectsData as Project[]
+  const project = projects.find(p => p.id === slug)
 
   if (!project) {
     notFound()

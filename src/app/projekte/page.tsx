@@ -2,12 +2,14 @@
 
 import ProjectCard from '@/components/ProjectCard'
 import TimelineProject from '@/components/TimelineProject'
+import { Project } from '@/types/project'
 import projectsData from '@/data/projects.json'
 
 export default function ProjectsPage() {
-  // Separate current and historical projects
-  const currentProjects = projectsData.filter(project => project.category === 'current')
-  const historicalProjects = projectsData
+  // Type cast and separate current and historical projects
+  const projects = projectsData as Project[]
+  const currentProjects = projects.filter(project => project.category === 'current')
+  const historicalProjects = projects
     .filter(project => project.category === 'historical')
     .sort((a, b) => b.year - a.year) // Sort from newest to oldest (2024→1998)
 

@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Project } from '@/types/project'
 import projectsData from '@/data/projects.json'
 
 export default function CurrentProjectsCarousel() {
-  const currentProjects = projectsData.filter(project => project.category === 'current')
+  const projects = projectsData as Project[]
+  const currentProjects = projects.filter(project => project.category === 'current')
   const [currentIndex, setCurrentIndex] = useState(0)
 
   // Auto-rotate carousel

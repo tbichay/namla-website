@@ -1,22 +1,5 @@
 import Link from 'next/link'
-
-interface Project {
-  id: string
-  name: string
-  location: string
-  status: string
-  description: string
-  priceFrom: string
-  year: number
-  category: string
-  images: string[]
-  details: {
-    livingSpace: string
-    rooms: string
-    price: string
-    completion: string
-  }
-}
+import { Project } from '@/types/project'
 
 interface TimelineProjectProps {
   project: Project
