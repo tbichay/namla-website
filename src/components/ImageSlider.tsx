@@ -28,8 +28,12 @@ export default function ImageSlider({ images, projectName }: ImageSliderProps) {
 
   return (
     <div className="relative">
-      <div className="aspect-[16/9] bg-gray-100 flex items-center justify-center">
-        <span className="text-gray-400 text-lg">Projekt Bild {currentImage + 1}</span>
+      <div className="aspect-[16/9] bg-gray-100 overflow-hidden">
+        <img
+          src={images[currentImage]}
+          alt={`${projectName} - Bild ${currentImage + 1}`}
+          className="w-full h-full object-cover"
+        />
       </div>
       
       {images.length > 1 && (

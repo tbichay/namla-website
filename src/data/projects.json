@@ -1,100 +1,245 @@
 [
   {
-    "id": "wohnpark-am-see",
-    "name": "Wohnpark am See",
-    "location": "Musterstadt",
-    "status": "verfügbar",
-    "description": "Moderne Eigentumswohnungen in ruhiger Seelage mit hochwertiger Ausstattung und direktem Wasserzugang.",
-    "priceFrom": "425.000",
-    "images": [
-      "/images/placeholder-1.jpg",
-      "/images/placeholder-2.jpg",
-      "/images/placeholder-3.jpg"
-    ],
-    "details": {
-      "livingSpace": "85-120 m²",
-      "rooms": "3-4 Zimmer",
-      "price": "ab 425.000 €",
-      "completion": "Q3 2024"
-    },
-    "floorPlan": "/images/grundriss-1.jpg"
-  },
-  {
-    "id": "villa-sonnenhang",
-    "name": "Villa Sonnenhang",
-    "location": "Bergstadt",
+    "id": "NU-LU-UR9",
+    "name": "Neubau 4 Reihenhäuser Neu-Ulm/Ludwigsfeld Ulmer Ried",
+    "location": "Neu-Ulm, Ulmer Ried 9",
     "status": "verkauft",
-    "description": "Exklusive Einfamilienhäuser in Hanglage mit Panoramablick und architektonischem Anspruch.",
-    "priceFrom": "850.000",
+    "description": "Hochwertige Reihenhäuser in bevorzugter Lage von Neu-Ulm. Moderne Architektur trifft auf durchdachte Grundrisse für anspruchsvolles Wohnen.",
+    "priceFrom": "---",
+    "year": 2024,
+    "category": "current",
     "images": [
-      "/images/placeholder-4.jpg",
-      "/images/placeholder-5.jpg"
+      "/images/NU-LU-UR9/Ulmer-Ried-Perspektive-01.jpg",
+      "/images/NU-LU-UR9/Ulmer-Ried-Perspektive-02.jpg",
+      "/images/NU-LU-UR9/Ulmer-Ried-Perspektive-03.jpg"
     ],
     "details": {
-      "livingSpace": "180-220 m²",
-      "rooms": "5-6 Zimmer",
-      "price": "ab 850.000 €",
-      "completion": "Q4 2023"
-    },
-    "floorPlan": "/images/grundriss-2.jpg"
-  },
-  {
-    "id": "stadtquartier-mitte",
-    "name": "Stadtquartier Mitte",
-    "location": "Zentrum",
-    "status": "verfügbar",
-    "description": "Urbanes Wohnen im Herzen der Stadt mit moderner Architektur und optimaler Infrastruktur.",
-    "priceFrom": "320.000",
-    "images": [
-      "/images/placeholder-6.jpg",
-      "/images/placeholder-7.jpg",
-      "/images/placeholder-8.jpg"
-    ],
-    "details": {
-      "livingSpace": "65-95 m²",
-      "rooms": "2-3 Zimmer",
-      "price": "ab 320.000 €",
-      "completion": "Q2 2024"
-    },
-    "floorPlan": "/images/grundriss-3.jpg"
-  },
-  {
-    "id": "gartenresidenz",
-    "name": "Gartenresidenz",
-    "location": "Grünstadt",
-    "status": "verkauft",
-    "description": "Ruhiges Wohnen im Grünen mit großzügigen Gärten und nachhaltiger Bauweise.",
-    "priceFrom": "560.000",
-    "images": [
-      "/images/placeholder-9.jpg",
-      "/images/placeholder-10.jpg"
-    ],
-    "details": {
-      "livingSpace": "110-140 m²",
+      "livingSpace": "140-180 m²",
       "rooms": "4-5 Zimmer",
-      "price": "ab 560.000 €",
-      "completion": "Q1 2023"
-    },
-    "floorPlan": "/images/grundriss-4.jpg"
-  },
-  {
-    "id": "penthouse-tower",
-    "name": "Penthouse Tower",
-    "location": "Skyline District",
-    "status": "verfügbar",
-    "description": "Luxuriöse Penthouse-Wohnungen mit Dachterrasse und 360-Grad-Blick über die Stadt.",
-    "priceFrom": "1.200.000",
-    "images": [
-      "/images/placeholder-11.jpg",
-      "/images/placeholder-12.jpg",
-      "/images/placeholder-13.jpg"
-    ],
-    "details": {
-      "livingSpace": "150-200 m²",
-      "rooms": "4-5 Zimmer",
-      "price": "ab 1.200.000 €",
-      "completion": "Q1 2025"
+      "price": "Verkauft",
+      "completion": "2024"
     },
     "floorPlan": "/images/grundriss-5.jpg"
+  },
+  {
+    "id": "wohnpark-donauaue",
+    "name": "Wohnpark Donauaue",
+    "location": "Neu-Ulm, Donauufer",
+    "status": "verfügbar",
+    "description": "Exklusives Neubauprojekt direkt am Donauufer. 16 hochwertige Eigentumswohnungen mit Panoramablick und modernster Ausstattung. Baubeginn 2025.",
+    "priceFrom": "580000",
+    "year": 2025,
+    "category": "current",
+    "images": ["/images/placeholder-current.jpg"],
+    "details": {
+      "livingSpace": "75-140 m²",
+      "rooms": "2-4 Zimmer",
+      "price": "ab 580.000 €",
+      "completion": "2025"
+    }
+  },
+  {
+    "id": "wohnanlage-eselsberg",
+    "name": "Wohnanlage Eselsberg",
+    "location": "Ulm-Eselsberg",
+    "status": "verfügbar",
+    "description": "Moderne Mehrfamilienhäuser in ruhiger Lage des Ulmer Stadtteils Eselsberg. Familienfreundliche Wohnungen mit hoher Bauqualität. Noch wenige Einheiten verfügbar.",
+    "priceFrom": "420000",
+    "year": 2020,
+    "category": "current",
+    "images": ["/images/placeholder-historical.jpg"],
+    "details": {
+      "livingSpace": "65-120 m²",
+      "rooms": "2-4 Zimmer",
+      "price": "ab 420.000 €",
+      "completion": "2020"
+    }
+  },
+  {
+    "id": "mehrfamilienhaus-soeflingen",
+    "name": "Mehrfamilienhaus Söflingen",
+    "location": "Ulm-Söflingen",
+    "status": "verkauft", 
+    "description": "Zentral gelegenes Mehrfamilienhaus mit sechs hochwertigen Wohneinheiten. Optimale Anbindung an die Ulmer Innenstadt.",
+    "priceFrom": "---",
+    "year": 2018,
+    "category": "historical",
+    "images": ["/images/placeholder-historical.jpg"],
+    "details": {
+      "livingSpace": "55-95 m²",
+      "rooms": "2-3 Zimmer", 
+      "price": "Verkauft",
+      "completion": "2018"
+    }
+  },
+  {
+    "id": "reihenhaussiedlung-wiblingen",
+    "name": "Reihenhaussiedlung Wiblingen",
+    "location": "Ulm-Wiblingen",
+    "status": "verkauft",
+    "description": "Acht moderne Reihenhäuser in familienfreundlicher Umgebung. Eigene Gärten und hochwertige Ausstattung zeichnen diese Anlage aus.",
+    "priceFrom": "---",
+    "year": 2016,
+    "category": "historical", 
+    "images": ["/images/placeholder-historical.jpg"],
+    "details": {
+      "livingSpace": "120-140 m²",
+      "rooms": "4-5 Zimmer",
+      "price": "Verkauft", 
+      "completion": "2016"
+    }
+  },
+  {
+    "id": "seniorenwohnanlage-boefingen",
+    "name": "Seniorenwohnanlage Böfingen",
+    "location": "Ulm-Böfingen",
+    "status": "verkauft",
+    "description": "Barrierefreie Wohnanlage für Senioren mit 24 Wohneinheiten. Zentrale Lage mit guter Infrastruktur und Betreuungsangebot.",
+    "priceFrom": "---", 
+    "year": 2015,
+    "category": "historical",
+    "images": ["/images/placeholder-historical.jpg"],
+    "details": {
+      "livingSpace": "45-75 m²",
+      "rooms": "1-3 Zimmer",
+      "price": "Verkauft",
+      "completion": "2015"
+    }
+  },
+  {
+    "id": "wohnpark-donautal",
+    "name": "Wohnpark Donautal",
+    "location": "Neu-Ulm",
+    "status": "verkauft",
+    "description": "Attraktive Wohnanlage mit Blick ins Donautal. 16 Eigentumswohnungen in verschiedenen Größen mit Balkonen und Terrassen.",
+    "priceFrom": "---",
+    "year": 2013,
+    "category": "historical",
+    "images": ["/images/placeholder-historical.jpg"],
+    "details": {
+      "livingSpace": "60-110 m²", 
+      "rooms": "2-4 Zimmer",
+      "price": "Verkauft",
+      "completion": "2013"
+    }
+  },
+  {
+    "id": "einfamilienhaus-ensemble-lehr",
+    "name": "Einfamilienhaus-Ensemble Lehr",
+    "location": "Ulm-Lehr",
+    "status": "verkauft",
+    "description": "Fünf individuelle Einfamilienhäuser in ruhiger Wohnlage. Jedes Haus mit eigenem Charakter und großzügigen Grundstücken.",
+    "priceFrom": "---",
+    "year": 2011,
+    "category": "historical",
+    "images": ["/images/placeholder-historical.jpg"],
+    "details": {
+      "livingSpace": "130-165 m²",
+      "rooms": "4-6 Zimmer", 
+      "price": "Verkauft",
+      "completion": "2011"
+    }
+  },
+  {
+    "id": "mehrfamilienhaus-weststadt",
+    "name": "Mehrfamilienhaus Weststadt", 
+    "location": "Ulm-Weststadt",
+    "status": "verkauft",
+    "description": "Modernes Mehrfamilienhaus mit zehn Wohneinheiten in der beliebten Weststadt. Hochwertige Ausstattung und zentrale Lage.",
+    "priceFrom": "---",
+    "year": 2009,
+    "category": "historical",
+    "images": ["/images/placeholder-historical.jpg"],
+    "details": {
+      "livingSpace": "50-85 m²",
+      "rooms": "2-3 Zimmer",
+      "price": "Verkauft", 
+      "completion": "2009"
+    }
+  },
+  {
+    "id": "doppelhauser-ermingen",
+    "name": "Doppelhäuser Ermingen",
+    "location": "Ulm-Ermingen", 
+    "status": "verkauft",
+    "description": "Sechs moderne Doppelhaushälften in ruhiger Ortsrandlage. Ideal für Familien mit eigenem Garten und Garage.",
+    "priceFrom": "---",
+    "year": 2007,
+    "category": "historical",
+    "images": ["/images/placeholder-historical.jpg"],
+    "details": {
+      "livingSpace": "110-125 m²",
+      "rooms": "4-5 Zimmer",
+      "price": "Verkauft",
+      "completion": "2007"
+    }
+  },
+  {
+    "id": "wohnanlage-am-kuhberg",
+    "name": "Wohnanlage am Kuhberg",
+    "location": "Ulm-Kuhberg",
+    "status": "verkauft", 
+    "description": "Wohnanlage mit 18 Eigentumswohnungen in exponierter Hanglage. Herrlicher Ausblick über die Stadt Ulm und das Umland.",
+    "priceFrom": "---",
+    "year": 2005,
+    "category": "historical",
+    "images": ["/images/placeholder-historical.jpg"],
+    "details": {
+      "livingSpace": "55-100 m²",
+      "rooms": "2-4 Zimmer",
+      "price": "Verkauft",
+      "completion": "2005"
+    }
+  },
+  {
+    "id": "stadtvilla-oststadt",
+    "name": "Stadtvilla Oststadt",
+    "location": "Ulm-Oststadt",
+    "status": "verkauft",
+    "description": "Exklusive Stadtvilla mit vier hochwertigen Wohneinheiten. Historisches Ambiente trifft auf moderne Ausstattung.",
+    "priceFrom": "---",
+    "year": 2003,
+    "category": "historical", 
+    "images": ["/images/placeholder-historical.jpg"],
+    "details": {
+      "livingSpace": "85-140 m²",
+      "rooms": "3-5 Zimmer",
+      "price": "Verkauft",
+      "completion": "2003"
+    }
+  },
+  {
+    "id": "wohnquartier-jungingen",
+    "name": "Wohnquartier Jungingen",
+    "location": "Ulm-Jungingen",
+    "status": "verkauft",
+    "description": "Kleines Wohnquartier mit zwölf Reihenhäusern. Familiäre Atmosphäre in ruhiger Lage mit guter Verkehrsanbindung.",
+    "priceFrom": "---",
+    "year": 2001,
+    "category": "historical",
+    "images": ["/images/placeholder-historical.jpg"],
+    "details": {
+      "livingSpace": "100-130 m²", 
+      "rooms": "3-4 Zimmer",
+      "price": "Verkauft",
+      "completion": "2001"
+    }
+  },
+  {
+    "id": "mehrfamilienhaus-mahringen",
+    "name": "Mehrfamilienhaus Mähringen",
+    "location": "Ulm-Mähringen",
+    "status": "verkauft",
+    "description": "Eines unserer ersten größeren Projekte - Mehrfamilienhaus mit acht Wohneinheiten in ländlicher, aber gut angebundener Lage.",
+    "priceFrom": "---",
+    "year": 1998,
+    "category": "historical",
+    "images": ["/images/placeholder-historical.jpg"],
+    "details": {
+      "livingSpace": "60-90 m²",
+      "rooms": "2-3 Zimmer",
+      "price": "Verkauft", 
+      "completion": "1998"
+    }
   }
 ]

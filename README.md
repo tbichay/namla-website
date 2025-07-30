@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NAMLA Bauträger Website
 
-## Getting Started
+Eine minimalistische Website für die Bauträgerfirma NAMLA im modernen Architekten-Stil.
 
-First, run the development server:
+## Features
+
+- **Responsive Design** mit Tailwind CSS
+- **Moderne Navigation** mit klarer Struktur
+- **Projektübersicht** mit Filterung (Verfügbar/Verkauft)
+- **Projekt-Detailseiten** mit Bildergalerie und Grundrissen
+- **Über uns Seite** mit Firmenphilosophie
+- **Kontaktformular** mit Standortinformationen
+
+## Technologie-Stack
+
+- Next.js 15 mit App Router
+- React 18
+- TypeScript
+- Tailwind CSS
+- Inter Font (Google Fonts)
+
+## Installation
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Die Website ist dann unter http://localhost:3000 verfügbar.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Projektstruktur
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/                 # Next.js App Router
+│   ├── page.tsx        # Startseite
+│   ├── projekte/       # Projekte Seiten
+│   ├── ueber-uns/      # Über uns Seite
+│   └── kontakt/        # Kontakt Seite
+├── components/         # React Komponenten
+│   ├── Layout/         # Header & Footer
+│   └── ui/            # UI Komponenten
+└── data/              # JSON Daten
+```
 
-## Learn More
+## Deployment
 
-To learn more about Next.js, take a look at the following resources:
+Die Website kann einfach auf Vercel deployed werden:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Mit Vercel CLI
+npx vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Oder direkt über GitHub Integration
+```
 
-## Deploy on Vercel
+## Design-Prinzipien
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Minimalistisch**: Viel Weißraum, klare Linien
+- **Typografie**: Modern und serifenlos (Inter)
+- **Farben**: Schwarz, Weiß, Hellgrau
+- **Keine Effekte**: Keine Schatten oder Verläufe
+- **Architektonisch**: Sachlich und professionell
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Anpassungen
+
+Die Projektdaten können in `src/data/projects.json` bearbeitet werden.
+Bilder sollten im `public/images/` Ordner platziert werden.
+
+---
+
+Entwickelt für NAMLA Bauträger GmbH
