@@ -1,5 +1,4 @@
 import Button from "@/components/ui/Button";
-import Image from "next/image";
 import CurrentProjectsCarousel from "@/components/CurrentProjectsCarousel";
 
 export default function Home() {

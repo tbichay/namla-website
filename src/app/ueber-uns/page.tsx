@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export default function AboutPage() {
   return (
     <div className="bg-stone-50 min-h-screen">
@@ -112,12 +114,12 @@ export default function AboutPage() {
             von Architekten und Bauträgern – das ist Ihr Vorteil bei NAMLA.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/projekte" className="inline-block px-8 py-3 bg-stone-800 text-white hover:bg-stone-700 transition-colors rounded-sm font-medium">
+            <Link href="/projekte" className="inline-block px-8 py-3 bg-stone-800 text-white hover:bg-stone-700 transition-colors rounded-sm font-medium">
               Unsere Projekte ansehen
-            </a>
-            <a href="/kontakt" className="inline-block px-8 py-3 border border-stone-800 text-stone-800 hover:bg-stone-800 hover:text-white transition-colors rounded-sm font-medium">
+            </Link>
+            <Link href="/kontakt" className="inline-block px-8 py-3 border border-stone-800 text-stone-800 hover:bg-stone-800 hover:text-white transition-colors rounded-sm font-medium">
               Beratungstermin vereinbaren
-            </a>
+            </Link>
           </div>
         </section>
       </div>

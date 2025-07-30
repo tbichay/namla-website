@@ -2,6 +2,8 @@
 
 import { notFound } from 'next/navigation'
 import { use } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
 import ImageSlider from '@/components/ImageSlider'
 import Button from '@/components/ui/Button'
 import projectsData from '@/data/projects.json'
@@ -26,9 +28,9 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
         {/* Breadcrumb & Header - Mobile First */}
         <div className="mb-6 sm:mb-8">
           <div className="flex items-center text-stone-500 mb-4 text-sm sm:text-base px-2 sm:px-0">
-            <a href="/projekte" className="hover:text-stone-800 transition-colors">
+            <Link href="/projekte" className="hover:text-stone-800 transition-colors">
               Projekte
-            </a>
+            </Link>
             <span className="mx-2">→</span>
             <span className="truncate">{project.name}</span>
           </div>
@@ -70,11 +72,12 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             {project.floorPlan && (
               <div className="mt-8 sm:mt-12 px-2 sm:px-0">
                 <h2 className="text-xl sm:text-2xl font-bold text-stone-800 mb-4">Grundriss</h2>
-                <div className="aspect-[4/3] bg-white rounded-lg shadow-sm overflow-hidden">
-                  <img
+                <div className="aspect-[4/3] bg-white rounded-lg shadow-sm overflow-hidden relative">
+                  <Image
                     src={project.floorPlan}
                     alt={`${project.name} - Grundriss`}
-                    className="w-full h-full object-contain"
+                    fill
+                    className="object-contain"
                   />
                 </div>
               </div>

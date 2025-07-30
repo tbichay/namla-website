@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import ProjectCard from '@/components/ProjectCard'
 import TimelineProject from '@/components/TimelineProject'
 import projectsData from '@/data/projects.json'

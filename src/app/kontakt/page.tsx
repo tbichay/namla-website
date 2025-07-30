@@ -3,13 +3,22 @@
 import { useState, useEffect } from 'react'
 import Button from '@/components/ui/Button'
 
+interface TurnstileOptions {
+  sitekey: string
+  callback: (token: string) => void
+  'error-callback'?: () => void
+  theme?: 'light' | 'dark'
+  size?: 'normal' | 'compact'
+}
+
 declare global {
   interface Window {
     turnstile?: {
-      render: (element: string | Element, options: any) => string
+      render: (element: string | Element, options: TurnstileOptions) => string
       reset: (widgetId?: string) => void
       remove: (widgetId?: string) => void
     }
+    onTurnstileCallback?: (token: string) => void
   }
 }
 
@@ -32,7 +41,7 @@ export default function ContactPage() {
     document.head.appendChild(script)
 
     // Set up global callback for Turnstile
-    ;(window as any).onTurnstileCallback = (token: string) => {
+    window.onTurnstileCallback = (token: string) => {
       setTurnstileToken(token)
     }
 
@@ -77,7 +86,7 @@ export default function ContactPage() {
         setSubmitStatus('error')
         alert(errorData.error || 'Fehler beim Senden der Nachricht')
       }
-    } catch (error) {
+    } catch {
       setSubmitStatus('error')
       alert('Fehler beim Senden der Nachricht')
     } finally {

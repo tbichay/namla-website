@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 
 interface ImageSliderProps {
   images: string[]
@@ -28,11 +29,12 @@ export default function ImageSlider({ images, projectName }: ImageSliderProps) {
 
   return (
     <div className="relative">
-      <div className="aspect-[16/9] bg-gray-100 overflow-hidden">
-        <img
+      <div className="aspect-[16/9] bg-gray-100 overflow-hidden relative">
+        <Image
           src={images[currentImage]}
           alt={`${projectName} - Bild ${currentImage + 1}`}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
         />
       </div>
       
