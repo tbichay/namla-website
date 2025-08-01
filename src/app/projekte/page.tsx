@@ -1,17 +1,86 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import ProjectCard from '@/components/ProjectCard'
 import HistoricalTimelineCard from '@/components/HistoricalTimelineCard'
-import { Project, isCurrentProject, isHistoricalProject } from '@/types/project'
-import projectsData from '@/data/projects.json'
+import { CurrentProject, HistoricalProject } from '@/types/project'
+import { adaptProjectsForPublic } from '@/lib/project-adapters'
+import type { Project as DbProject } from '@/lib/db'
 
 export default function ProjectsPage() {
-  // Type cast and separate current and historical projects
-  const projects = projectsData as Project[]
-  const currentProjects = projects.filter(isCurrentProject)
-  const historicalProjects = projects
-    .filter(isHistoricalProject)
-    .sort((a, b) => b.year - a.year) // Sort from newest to oldest (2024→1998)
+  const [currentProjects, setCurrentProjects] = useState<CurrentProject[]>([])
+  const [historicalProjects, setHistoricalProjects] = useState<HistoricalProject[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    fetchProjects()
+  }, [])
+
+  const fetchProjects = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/projects')
+      const data = await response.json()
+      
+      if (response.ok) {
+        // API returns separated projects, so we can use them directly
+        const dbProjects = [...(data.current || []), ...(data.historical || [])] as DbProject[]
+        const { currentProjects: current, historicalProjects: historical } = adaptProjectsForPublic(dbProjects)
+        
+        setCurrentProjects(current)
+        setHistoricalProjects(historical)
+      } else {
+        setError('Failed to load projects')
+      }
+    } catch (err) {
+      console.error('Error fetching projects:', err)
+      setError('Failed to load projects')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="bg-stone-50 min-h-screen">
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+          <div className="text-center mb-8 sm:mb-12">
+            <div className="animate-pulse">
+              <div className="h-12 bg-stone-200 rounded w-64 mx-auto mb-4"></div>
+              <div className="h-6 bg-stone-200 rounded w-96 mx-auto"></div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-64 bg-stone-200 rounded-lg animate-pulse"></div>
+            ))}
+          </div>
+        </section>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-stone-50 min-h-screen">
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+          <div className="text-center">
+            <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 mb-4">
+              Projekte konnten nicht geladen werden
+            </h1>
+            <p className="text-stone-600 mb-6">{error}</p>
+            <button 
+              onClick={fetchProjects}
+              className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg transition-colors"
+            >
+              Erneut versuchen
+            </button>
+          </div>
+        </section>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-stone-50 min-h-screen">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Image from 'next/image'
 import { HistoricalProject } from '@/types/project'
 import LightboxGallery from './LightboxGallery'
@@ -18,13 +18,21 @@ export default function HistoricalTimelineCard({
 }: HistoricalTimelineCardProps) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+  
+  // Filter out empty/invalid images
+  const validImages = useMemo(() => 
+    project.images.filter(img => img && img.trim().length > 0), 
+    [project.images]
+  )
 
   // Calculate visual evolution effects (newer = more vibrant, older = more muted)
-  const ageRatio = index / (total - 1) // 0 = newest, 1 = oldest
+  const ageRatio = total > 1 ? index / (total - 1) : 0 // 0 = newest, 1 = oldest
   const opacity = 1 - (ageRatio * 0.2) // Range from 1.0 to 0.8
   const saturation = 100 - (ageRatio * 30) // Range from 100% to 70%
 
-  const openLightbox = () => {
+  const openLightbox = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     setIsLightboxOpen(true)
   }
 
@@ -53,11 +61,12 @@ export default function HistoricalTimelineCard({
           }}
         >
           {/* Main project image or placeholder */}
-          {project.images.length > 0 ? (
+          {validImages.length > 0 ? (
             <Image
-              src={project.images[0]}
+              src={validImages[0]}
               alt={project.name}
               fill
+              sizes="192px"
               className="object-cover transition-all duration-300"
               style={{
                 filter: isHovered ? 'none' : 'grayscale(0.3)'
@@ -73,12 +82,12 @@ export default function HistoricalTimelineCard({
           )}
 
           {/* Hover Preview Overlay */}
-          {isHovered && project.images.length > 1 && (
+          {isHovered && validImages.length > 1 && (
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
               {/* Preview Thumbnails */}
               <div className="absolute bottom-2 left-2 right-2">
                 <div className="flex space-x-1 mb-2">
-                  {project.images.slice(1, 4).map((image, imgIndex) => (
+                  {validImages.slice(1, 4).map((image, imgIndex) => (
                     <div 
                       key={imgIndex}
                       className="relative w-8 h-8 rounded bg-white/20 backdrop-blur-sm overflow-hidden"
@@ -87,14 +96,15 @@ export default function HistoricalTimelineCard({
                         src={image}
                         alt={`Preview ${imgIndex + 2}`}
                         fill
+                        sizes="32px"
                         className="object-cover"
                       />
                     </div>
                   ))}
-                  {project.images.length > 4 && (
+                  {validImages.length > 4 && (
                     <div className="w-8 h-8 rounded bg-white/20 backdrop-blur-sm flex items-center justify-center">
                       <span className="text-white text-xs font-medium">
-                        +{project.images.length - 4}
+                        +{validImages.length - 4}
                       </span>
                     </div>
                   )}
@@ -109,7 +119,7 @@ export default function HistoricalTimelineCard({
           )}
 
           {/* Single Image Hint */}
-          {isHovered && project.images.length === 1 && (
+          {isHovered && validImages.length === 1 && (
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent">
               <div className="absolute bottom-2 left-2 right-2">
                 <div className="text-white text-xs font-medium opacity-90">
@@ -151,12 +161,14 @@ export default function HistoricalTimelineCard({
       </div>
 
       {/* Lightbox Gallery */}
-      <LightboxGallery
-        images={project.images}
-        isOpen={isLightboxOpen}
-        onClose={closeLightbox}
-        projectName={project.name}
-      />
+      {isLightboxOpen && (
+        <LightboxGallery
+          images={validImages}
+          isOpen={isLightboxOpen}
+          onClose={closeLightbox}
+          projectName={project.name}
+        />
+      )}
     </>
   )
 }

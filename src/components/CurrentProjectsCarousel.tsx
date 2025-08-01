@@ -2,15 +2,38 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import { Project, isCurrentProject } from '@/types/project'
-import projectsData from '@/data/projects.json'
+import { CurrentProject } from '@/types/project'
+import { adaptProjectsForPublic } from '@/lib/project-adapters'
+import type { Project as DbProject } from '@/lib/db'
 
 export default function CurrentProjectsCarousel() {
-  const projects = projectsData as Project[]
-  const currentProjects = projects.filter(isCurrentProject)
+  const [currentProjects, setCurrentProjects] = useState<CurrentProject[]>([])
+  const [loading, setLoading] = useState(true)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
   const carouselRef = useRef<HTMLDivElement>(null)
+
+  // Fetch projects from API
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const response = await fetch('/api/projects?category=current')
+        const data = await response.json()
+        
+        if (response.ok && data.projects) {
+          // Convert database projects to frontend format
+          const { currentProjects: current } = adaptProjectsForPublic(data.projects as DbProject[])
+          setCurrentProjects(current)
+        }
+      } catch (error) {
+        console.error('Error fetching current projects:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchProjects()
+  }, [])
 
   const goToSlide = useCallback((index: number) => {
     setCurrentIndex(index)
@@ -59,6 +82,14 @@ export default function CurrentProjectsCarousel() {
     }
   }, [isPlaying, nextSlide, prevSlide])
 
+  if (loading) {
+    return (
+      <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] bg-stone-200 rounded-lg flex items-center justify-center animate-pulse">
+        <span className="text-stone-500">Projekte werden geladen...</span>
+      </div>
+    )
+  }
+
   if (currentProjects.length === 0) {
     return (
       <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] bg-stone-200 rounded-lg flex items-center justify-center">
@@ -85,12 +116,23 @@ export default function CurrentProjectsCarousel() {
       </div>
       
       {/* Main Image */}
-      <div className="relative w-full h-full bg-gradient-to-br from-amber-100 to-stone-200 flex items-center justify-center">
-        <div className="text-center text-stone-600">
-          <div className="text-sm mb-2">Projekt Visualisierung</div>
-          <div className="text-2xl font-bold mb-1">{currentProject.name}</div>
-          <div className="text-sm">{currentProject.location}</div>
-        </div>
+      <div className="relative w-full h-full">
+        {currentProject.images && currentProject.images.length > 0 ? (
+          <img
+            src={currentProject.images[0]}
+            alt={currentProject.name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-amber-100 to-stone-200 flex items-center justify-center">
+            <div className="text-center text-stone-600">
+              <div className="text-sm mb-2">Projekt Visualisierung</div>
+              <div className="text-2xl font-bold mb-1">{currentProject.name}</div>
+              <div className="text-sm">{currentProject.location}</div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Gradient Overlay */}

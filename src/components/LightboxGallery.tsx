@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import Image from 'next/image'
 
@@ -19,14 +19,19 @@ export default function LightboxGallery({
   initialIndex = 0,
   projectName 
 }: LightboxGalleryProps) {
+  // Filter out empty/invalid images
+  const validImages = useMemo(() => 
+    images.filter(img => img && img.trim().length > 0), 
+    [images]
+  )
   const [currentIndex, setCurrentIndex] = useState(initialIndex)
 
   // Reset to initial index when lightbox opens
   useEffect(() => {
     if (isOpen) {
-      setCurrentIndex(initialIndex)
+      setCurrentIndex(Math.min(initialIndex, validImages.length - 1))
     }
-  }, [isOpen, initialIndex])
+  }, [isOpen, initialIndex, validImages.length])
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -39,11 +44,11 @@ export default function LightboxGallery({
           break
         case 'ArrowLeft':
           e.preventDefault()
-          setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
+          setCurrentIndex((prev) => (prev - 1 + validImages.length) % validImages.length)
           break
         case 'ArrowRight':
           e.preventDefault()
-          setCurrentIndex((prev) => (prev + 1) % images.length)
+          setCurrentIndex((prev) => (prev + 1) % validImages.length)
           break
       }
     }
@@ -55,19 +60,24 @@ export default function LightboxGallery({
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = 'unset'
     }
-  }, [isOpen, images.length, onClose])
+  }, [isOpen, validImages.length, onClose])
 
   const nextImage = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length)
+    setCurrentIndex((prev) => (prev + 1) % validImages.length)
   }
 
   const prevImage = () => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
+    setCurrentIndex((prev) => (prev - 1 + validImages.length) % validImages.length)
   }
 
+  // Early returns to prevent rendering issues
   if (!isOpen) return null
-
+  if (validImages.length === 0) return null
+  
   // Use portal to render outside of parent container
+  // Add safety check for document.body
+  if (typeof window === 'undefined' || !document.body) return null
+  
   return createPortal(
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center"
@@ -90,7 +100,7 @@ export default function LightboxGallery({
           <div>
             <h3 id="lightbox-title" className="text-lg font-medium">{projectName}</h3>
             <p id="lightbox-description" className="text-sm opacity-75">
-              Bild {currentIndex + 1} von {images.length}
+              Bild {currentIndex + 1} von {validImages.length}
             </p>
           </div>
           <button
@@ -108,16 +118,17 @@ export default function LightboxGallery({
         <div className="flex-1 relative flex items-center justify-center">
           <div className="relative w-full h-full max-w-4xl max-h-[80vh]">
             <Image
-              src={images[currentIndex]}
+              src={validImages[currentIndex]}
               alt={`${projectName} - Bild ${currentIndex + 1}`}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1024px"
               className="object-contain"
               priority
             />
           </div>
 
           {/* Navigation Arrows */}
-          {images.length > 1 && (
+          {validImages.length > 1 && (
             <>
               <button
                 onClick={prevImage}
@@ -142,9 +153,9 @@ export default function LightboxGallery({
         </div>
 
         {/* Thumbnail Navigation */}
-        {images.length > 1 && (
+        {validImages.length > 1 && (
           <div className="flex justify-center mt-4 space-x-2 overflow-x-auto pb-2">
-            {images.map((image, index) => (
+            {validImages.map((image, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
@@ -158,6 +169,7 @@ export default function LightboxGallery({
                   src={image}
                   alt={`Thumbnail ${index + 1}`}
                   fill
+                  sizes="64px"
                   className="object-cover"
                 />
               </button>

@@ -8,8 +8,19 @@ interface ProjectCardProps {
 export default function ProjectCard({ project }: ProjectCardProps) {
   return (
     <article className="bg-white border border-stone-200 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
-      <div className="aspect-[4/3] bg-stone-100 flex items-center justify-center" role="img" aria-label={`Projektbild für ${project.name}`}>
-        <span className="text-stone-400 text-sm sm:text-base">Projekt Bild</span>
+      <div className="aspect-[4/3] bg-stone-100 relative overflow-hidden" role="img" aria-label={`Projektbild für ${project.name}`}>
+        {project.images && project.images.length > 0 ? (
+          <img
+            src={project.images[0]}
+            alt={project.name}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-stone-400 text-sm sm:text-base">Projekt Bild</span>
+          </div>
+        )}
       </div>
       
       <div className="p-4 sm:p-6">

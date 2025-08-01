@@ -1,6 +1,11 @@
+'use client'
+
 import Image from 'next/image'
+import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 export default function Footer() {
+  const { data: session } = useSession()
   return (
     <footer className="bg-stone-100 border-t border-stone-200" role="contentinfo">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -45,6 +50,16 @@ export default function Footer() {
                 <a href="/barrierefreiheit" className="block text-stone-600 hover:text-stone-800 transition-colors text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 rounded-sm">
                   Barrierefreiheit
                 </a>
+                {/* Admin Link - seamlessly integrated */}
+                {session?.user?.role === 'admin' ? (
+                  <Link href="/admin/dashboard" className="block text-stone-600 hover:text-stone-800 transition-colors text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 rounded-sm">
+                    Dashboard
+                  </Link>
+                ) : (
+                  <Link href="/admin/login" className="block text-stone-600 hover:text-stone-800 transition-colors text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 rounded-sm">
+                    Login
+                  </Link>
+                )}
               </div>
             </nav>
           </div>
