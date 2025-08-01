@@ -236,7 +236,13 @@ async function main() {
       console.log('✅ Reset .env.local to production configuration')
     }
     
-    // 4. R2 Storage cleanup info
+    // 4. Remove .env file (used by Vercel for preview)
+    if (fs.existsSync('.env')) {
+      fs.unlinkSync('.env')
+      console.log('✅ Removed .env file (was used for Vercel preview)')
+    }
+    
+    // 5. R2 Storage cleanup info
     if (!keepR2) {
       console.log(`\n📁 R2 Storage Folder: branch-${branchName}/`)
       console.log(`ℹ️  Note: R2 files are kept for debugging purposes`)

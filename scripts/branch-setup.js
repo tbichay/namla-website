@@ -161,7 +161,7 @@ async function createBranchEndpoint(projectId, branchId, apiKey) {
   await new Promise(resolve => setTimeout(resolve, 5000))
 }
 
-async function buildConnectionString(projectId, branchId, endpoint, apiKey) {
+async function buildConnectionString(projectId, branchId, endpoint, apiKey, envVars = {}) {
   // Get database details
   const dbResponse = await fetch(`${NEON_API_BASE}/projects/${projectId}/branches/${branchId}/databases`, {
     headers: { 'Authorization': `Bearer ${apiKey}` }
@@ -181,7 +181,7 @@ async function buildConnectionString(projectId, branchId, endpoint, apiKey) {
   if (!role.password) {
     console.log('⚠️  Warning: No password found for role, using production password')
     // Use production password from environment
-    const productionPassword = envVars.DATABASE_URL?.match(/:([^@]+)@/)?.[1] || 'npg_dRjBwL2p6xMI'
+    const productionPassword = envVars.DATABASE_URL?.match(/:([^@]+)@/)?.[1] || process.env.DATABASE_URL?.match(/:([^@]+)@/)?.[1] || 'npg_dRjBwL2p6xMI'
     
     // Add pooler suffix if not present
     const poolerHost = endpoint.host.includes('-pooler.') ? endpoint.host : endpoint.host.replace('.eu-central-1.aws.neon.tech', '-pooler.eu-central-1.aws.neon.tech')
@@ -246,7 +246,7 @@ async function getBranchConnectionString(projectId, branchId, apiKey, envVars = 
     await new Promise(resolve => setTimeout(resolve, 2000))
   }
   
-  return await buildConnectionString(projectId, branchId, endpoint, apiKey)
+  return await buildConnectionString(projectId, branchId, endpoint, apiKey, envVars)
 }
 
 async function setVercelEnvironmentVariables(projectId, branchName, envVars, vercelToken) {
@@ -361,30 +361,13 @@ async function main() {
       console.log(`📦 Backed up current .env.local to ${backupEnvFile}`)
     }
     
-    // 6. Write directly to .env.local (unified approach)
+    // 6. Write to both .env.local (for local dev) and .env (for Vercel)
     writeEnvFile('.env.local', branchEnvVars)
-    console.log(`✅ Updated .env.local with branch configuration`)
+    writeEnvFile('.env', branchEnvVars)
+    console.log(`✅ Updated .env.local and .env with branch configuration`)
     
-    // 7. Set Vercel environment variables (using same values as .env.local)
-    if (hasVercelConfig) {
-      await setVercelEnvironmentVariables(
-        envVars.VERCEL_PROJECT_ID,
-        currentBranch,
-        {
-          DATABASE_URL: branchDatabaseUrl,
-          R2_BUCKET_NAME: branchEnvVars.R2_BUCKET_NAME,
-          R2_ACCESS_KEY_ID: branchEnvVars.R2_ACCESS_KEY_ID,
-          R2_SECRET_ACCESS_KEY: branchEnvVars.R2_SECRET_ACCESS_KEY,
-          R2_ACCOUNT_ID: branchEnvVars.R2_ACCOUNT_ID,
-          R2_FOLDER_PREFIX: branchEnvVars.R2_FOLDER_PREFIX,
-          NEXT_PUBLIC_SITE_URL: branchEnvVars.NEXT_PUBLIC_SITE_URL,
-          NEXTAUTH_URL: branchEnvVars.NEXT_PUBLIC_SITE_URL,
-          NEXTAUTH_SECRET: branchEnvVars.NEXTAUTH_SECRET,
-          BRANCH_NAME: currentBranch
-        },
-        envVars.VERCEL_TOKEN
-      )
-    }
+    // 7. Vercel will automatically use .env file for preview deployments
+    console.log(`✅ Vercel will automatically use .env file for preview deployments`)
     
     // 8. Run database migrations
     await runDatabaseMigrations(branchDatabaseUrl)
@@ -394,8 +377,8 @@ async function main() {
     console.log(`   Branch: ${currentBranch}`)
     console.log(`   Database: ${branch.name}`)
     console.log(`   R2 Folder: branch-${currentBranch}/`)
-    console.log(`   Environment: .env.local (backed up to ${backupEnvFile})`)
-    console.log(`   Vercel Preview: Same configuration as local`)
+    console.log(`   Environment: .env.local + .env (backed up to ${backupEnvFile})`)
+    console.log(`   Vercel Preview: Uses .env file automatically`)
     console.log(`\n🚀 Ready to use:`)
     console.log(`   npm run dev  # Uses branch database & isolated R2`)
     console.log(`   git push     # Vercel preview uses same config`)
