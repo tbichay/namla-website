@@ -158,6 +158,73 @@ async function runDatabaseMigrations() {
   }
 }
 
+async function pushEnvironmentVariablesToVercel(branchName) {
+  console.log('🔄 Pushing environment variables to Vercel...')
+  
+  try {
+    // Load all environment variables from .env.local
+    const envVars = loadEnvFile('.env.local')
+    
+    // Essential variables that Vercel needs for the build
+    const essentialVars = [
+      'DATABASE_URL',
+      'NEXTAUTH_SECRET', 
+      'NEXTAUTH_URL',
+      'R2_ACCOUNT_ID',
+      'R2_ACCESS_KEY_ID', 
+      'R2_SECRET_ACCESS_KEY',
+      'R2_BUCKET_NAME',
+      'R2_FOLDER_PREFIX',
+      'NEXT_PUBLIC_SITE_URL',
+      'NEXT_PUBLIC_COMING_SOON_MODE',
+      'ADMIN_EMAIL',
+      'ADMIN_PASSWORD',
+      'BRANCH_NAME'
+    ]
+    
+    let pushedCount = 0
+    
+    for (const varName of essentialVars) {
+      if (envVars[varName]) {
+        try {
+          // Use vercel env add command for each variable
+          execSync(`vercel env add ${varName} preview ${branchName}`, {
+            input: envVars[varName],
+            stdio: ['pipe', 'pipe', 'pipe']
+          })
+          console.log(`✅ Added ${varName} to Vercel`)
+          pushedCount++
+        } catch (error) {
+          // Variable might already exist, try to remove and re-add
+          try {
+            execSync(`vercel env rm ${varName} preview ${branchName} --yes`, { stdio: 'pipe' })
+            execSync(`vercel env add ${varName} preview ${branchName}`, {
+              input: envVars[varName],
+              stdio: ['pipe', 'pipe', 'pipe']
+            })
+            console.log(`✅ Updated ${varName} in Vercel`)
+            pushedCount++
+          } catch (updateError) {
+            console.log(`⚠️  Could not set ${varName}: ${updateError.message}`)
+          }
+        }
+      }
+    }
+    
+    if (pushedCount > 0) {
+      console.log(`✅ Pushed ${pushedCount} environment variables to Vercel`)
+    } else {
+      console.log('⚠️  No environment variables were pushed to Vercel')
+      console.log('💡 Make sure you are logged in to Vercel CLI: vercel login')
+    }
+    
+  } catch (error) {
+    console.log(`⚠️  Could not push environment variables to Vercel: ${error.message}`)
+    console.log('💡 You may need to set them manually in Vercel dashboard')
+    console.log('   Or ensure Vercel CLI is installed and authenticated')
+  }
+}
+
 async function main() {
   console.log('🚀 NAMLA Preview Deployment Starting...\n')
   
@@ -203,7 +270,10 @@ async function main() {
       }
     }
     
-    // 6. Wait for Vercel deployment
+    // 6. Push environment variables to Vercel
+    await pushEnvironmentVariablesToVercel(currentBranch)
+
+    // 7. Wait for Vercel deployment
     const previewUrl = await waitForVercelDeployment(
       envVars.VERCEL_PROJECT_ID,
       currentBranch,
