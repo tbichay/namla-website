@@ -2,6 +2,8 @@
 
 import { notFound } from 'next/navigation'
 import { use, useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import MediaGallery from '@/components/MediaGallery'
 import Button from '@/components/ui/Button'
@@ -64,9 +66,20 @@ interface ProjectData {
 
 export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { slug } = use(params)
+  const { data: session } = useSession()
+  const router = useRouter()
+  const isAdmin = session?.user?.role === 'admin'
+  const comingSoonMode = process.env.NEXT_PUBLIC_COMING_SOON_MODE === 'true'
   const [project, setProject] = useState<ProjectData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Redirect public users to coming soon page
+  useEffect(() => {
+    if (comingSoonMode && !isAdmin) {
+      router.push('/')
+    }
+  }, [comingSoonMode, isAdmin, router])
 
   useEffect(() => {
     async function fetchProject() {

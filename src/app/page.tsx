@@ -1,7 +1,21 @@
+'use client'
+
+import { useSession } from 'next-auth/react'
 import Button from "@/components/ui/Button";
 import CurrentProjectsCarousel from "@/components/CurrentProjectsCarousel";
+import ComingSoonPage from "@/components/ComingSoonPage";
 
 export default function Home() {
+  const { data: session } = useSession()
+  const isAdmin = session?.user?.role === 'admin'
+  const comingSoonMode = process.env.NEXT_PUBLIC_COMING_SOON_MODE === 'true'
+  
+  // Show coming soon page for public users when mode is active
+  if (comingSoonMode && !isAdmin) {
+    return <ComingSoonPage />
+  }
+  
+  // Show regular homepage for admins or when coming soon mode is off
   return (
     <div className="bg-stone-50">
       {/* Hero Section - Professional Trust-Building */}

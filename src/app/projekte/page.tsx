@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import ProjectCard from '@/components/ProjectCard'
 import HistoricalTimelineCard from '@/components/HistoricalTimelineCard'
 import { CurrentProject, HistoricalProject } from '@/types/project'
@@ -8,6 +10,17 @@ import { adaptProjectsForPublic } from '@/lib/project-adapters'
 import type { Project as DbProject } from '@/lib/db'
 
 export default function ProjectsPage() {
+  const { data: session } = useSession()
+  const router = useRouter()
+  const isAdmin = session?.user?.role === 'admin'
+  const comingSoonMode = process.env.NEXT_PUBLIC_COMING_SOON_MODE === 'true'
+  
+  // Redirect public users to coming soon page
+  useEffect(() => {
+    if (comingSoonMode && !isAdmin) {
+      router.push('/')
+    }
+  }, [comingSoonMode, isAdmin, router])
   const [currentProjects, setCurrentProjects] = useState<CurrentProject[]>([])
   const [historicalProjects, setHistoricalProjects] = useState<HistoricalProject[]>([])
   const [loading, setLoading] = useState(true)
