@@ -84,6 +84,35 @@ function commitAndPush(branchName, message) {
   }
 }
 
+async function setVercelEnvironmentVariables(projectId, branchName, envVars, vercelToken) {
+  console.log(`🔄 Setting Vercel environment variables for branch: ${branchName}`)
+  
+  for (const [key, value] of Object.entries(envVars)) {
+    const response = await fetch(`${VERCEL_API_BASE}/v10/projects/${projectId}/env`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${vercelToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        key,
+        value,
+        type: 'encrypted',
+        target: ['preview'],
+        gitBranch: branchName
+      })
+    })
+
+    if (response.ok) {
+      console.log(`✅ Set ${key} for branch ${branchName}`)
+    } else {
+      // Variable might already exist, try to update it
+      const error = await response.text()
+      console.log(`⚠️  ${key} might already exist: ${error}`)
+    }
+  }
+}
+
 async function waitForVercelDeployment(projectId, branchName, vercelToken, maxWaitTime = 300000) {
   if (!vercelToken || !projectId) {
     console.log('ℹ️  Vercel API not configured - skipping deployment monitoring')
@@ -204,8 +233,21 @@ async function main() {
       }
     }
     
-    // 6. .env file will be automatically used by Vercel for preview deployment
-    console.log('✅ .env file will be committed and used by Vercel preview deployment')
+    // 6. Set Vercel environment variables via API
+    if (envVars.VERCEL_TOKEN && envVars.VERCEL_PROJECT_ID) {
+      console.log('🔄 Setting Vercel environment variables via API...')
+      const branchEnvVars = loadEnvFile('.env')
+      await setVercelEnvironmentVariables(
+        envVars.VERCEL_PROJECT_ID,
+        currentBranch,
+        branchEnvVars,
+        envVars.VERCEL_TOKEN
+      )
+      console.log('✅ Vercel environment variables set for preview deployment')
+    } else {
+      console.log('⚠️  Vercel API not configured - environment variables not set')
+      console.log('💡 Add VERCEL_TOKEN and VERCEL_PROJECT_ID to .env.local for automatic setup')
+    }
 
     // 7. Wait for Vercel deployment
     const previewUrl = await waitForVercelDeployment(
