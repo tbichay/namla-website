@@ -84,74 +84,8 @@ function commitAndPush(branchName, message) {
   }
 }
 
-async function getExistingVercelEnvironmentVariables(projectId, vercelToken) {
-  const response = await fetch(`${VERCEL_API_BASE}/v10/projects/${projectId}/env`, {
-    headers: { 'Authorization': `Bearer ${vercelToken}` }
-  })
-  
-  if (response.ok) {
-    const data = await response.json()
-    return data.envs || []
-  }
-  return []
-}
-
-async function setVercelEnvironmentVariables(projectId, branchName, envVars, vercelToken) {
-  console.log(`🔄 Setting Vercel environment variables for branch: ${branchName}`)
-  
-  // Get existing environment variables first
-  const existingVars = await getExistingVercelEnvironmentVariables(projectId, vercelToken)
-  
-  for (const [key, value] of Object.entries(envVars)) {
-    // Check if variable already exists
-    const existingVar = existingVars.find(env => env.key === key && env.target.includes('preview'))
-    
-    if (existingVar) {
-      // Update existing variable
-      console.log(`🔄 Updating existing variable: ${key}`)
-      const updateResponse = await fetch(`${VERCEL_API_BASE}/v9/projects/${projectId}/env/${existingVar.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${vercelToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          value,
-          target: ['preview']
-        })
-      })
-      
-      if (updateResponse.ok) {
-        console.log(`✅ Updated ${key} for branch ${branchName}`)
-      } else {
-        const error = await updateResponse.text()
-        console.log(`❌ Failed to update ${key}: ${updateResponse.status} - ${error}`)
-      }
-    } else {
-      // Create new variable
-      const response = await fetch(`${VERCEL_API_BASE}/v10/projects/${projectId}/env`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${vercelToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          key,
-          value,
-          type: 'encrypted',
-          target: ['preview']
-        })
-      })
-
-      if (response.ok) {
-        console.log(`✅ Created ${key} for branch ${branchName}`)
-      } else {
-        const error = await response.text()
-        console.log(`❌ Failed to create ${key}: ${response.status} - ${error}`)
-      }
-    }
-  }
-}
+// Removed Vercel API environment variable functions
+// Now using file-based approach with .env.production
 
 async function waitForVercelDeployment(projectId, branchName, vercelToken, maxWaitTime = 300000) {
   if (!vercelToken || !projectId) {
@@ -259,23 +193,24 @@ async function main() {
     // 4. Run database migrations for feature branch
     await runDatabaseMigrations()
     
-    // 5. Set Vercel environment variables BEFORE deployment
-    if (envVars.VERCEL_TOKEN && envVars.VERCEL_PROJECT_ID) {
-      console.log('🔄 Setting Vercel environment variables via API...')
-      const branchEnvVars = loadEnvFile('.env')
-      await setVercelEnvironmentVariables(
-        envVars.VERCEL_PROJECT_ID,
-        currentBranch,
-        branchEnvVars,
-        envVars.VERCEL_TOKEN
-      )
-      console.log('✅ Vercel environment variables set')
-      console.log('⏳ Waiting 5 seconds for variables to propagate...')
-      await new Promise(resolve => setTimeout(resolve, 5000))
-    } else {
-      console.log('⚠️  Vercel API not configured - environment variables not set')
-      console.log('💡 Add VERCEL_TOKEN and VERCEL_PROJECT_ID to .env.local for automatic setup')
+    // 5. Create .env.production file for Vercel (file-based approach)
+    console.log('📁 Creating .env.production file for Vercel...')
+    const branchEnvVars = loadEnvFile('.env')
+    
+    if (Object.keys(branchEnvVars).length === 0) {
+      console.error('❌ No .env file found with branch configuration')
+      console.log('💡 Make sure npm run branch:setup created the .env file')
+      process.exit(1)
     }
+    
+    // Write branch-specific variables to .env.production (Next.js loads this on Vercel)
+    const envContent = Object.entries(branchEnvVars)
+      .map(([key, value]) => `${key}="${value}"`)
+      .join('\n')
+    
+    fs.writeFileSync('.env.production', envContent + '\n')
+    console.log(`✅ Created .env.production with ${Object.keys(branchEnvVars).length} variables`)
+    console.log('💡 Next.js will automatically load .env.production on Vercel')
     
     // 6. Commit and push to trigger deployment
     if (hasUncommittedChanges()) {

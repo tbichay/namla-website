@@ -236,10 +236,15 @@ async function main() {
       console.log('✅ Reset .env.local to production configuration')
     }
     
-    // 4. Remove .env file (used by Vercel for preview)
+    // 4. Remove .env files (used by Vercel for preview)
     if (fs.existsSync('.env')) {
       fs.unlinkSync('.env')
-      console.log('✅ Removed .env file (was used for Vercel preview)')
+      console.log('✅ Removed .env file')
+    }
+    
+    if (fs.existsSync('.env.production')) {
+      fs.unlinkSync('.env.production')
+      console.log('✅ Removed .env.production file (was used for Vercel preview)')
     }
     
     // 5. R2 Storage cleanup info
