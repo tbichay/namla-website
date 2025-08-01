@@ -161,7 +161,61 @@ async function createBranchEndpoint(projectId, branchId, apiKey) {
   await new Promise(resolve => setTimeout(resolve, 5000))
 }
 
+async function waitForRolePassword(projectId, branchId, apiKey, maxWaitTime = 30000) {
+  console.log('⏳ Waiting for role password to be available...')
+  const startTime = Date.now()
+  
+  while (Date.now() - startTime < maxWaitTime) {
+    const response = await fetch(`${NEON_API_BASE}/projects/${projectId}/branches/${branchId}/roles`, {
+      headers: { 'Authorization': `Bearer ${apiKey}` }
+    })
+    
+    if (!response.ok) {
+      console.log(`⚠️  Role fetch failed: ${response.status}`)
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      continue
+    }
+    
+    const data = await response.json()
+    const role = data.roles[0]
+    
+    if (role && role.password) {
+      console.log('✅ Role password is available')
+      return role
+    }
+    
+    console.log('⏳ Password not yet available, waiting...')
+    await new Promise(resolve => setTimeout(resolve, 2000))
+  }
+  
+  console.log('⚠️  Role password not available after waiting')
+  return null
+}
+
+async function resetRolePassword(projectId, branchId, roleName, apiKey) {
+  console.log(`🔄 Resetting password for role: ${roleName}`)
+  
+  const response = await fetch(`${NEON_API_BASE}/projects/${projectId}/branches/${branchId}/roles/${roleName}/reset_password`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    }
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Failed to reset role password: ${error}`)
+  }
+
+  const data = await response.json()
+  console.log('✅ Role password reset successfully')
+  return data.role
+}
+
 async function buildConnectionString(projectId, branchId, endpoint, apiKey, envVars = {}) {
+  console.log('🔍 Building connection string for branch database...')
+  
   // Get database details
   const dbResponse = await fetch(`${NEON_API_BASE}/projects/${projectId}/branches/${branchId}/databases`, {
     headers: { 'Authorization': `Bearer ${apiKey}` }
@@ -169,25 +223,51 @@ async function buildConnectionString(projectId, branchId, endpoint, apiKey, envV
   
   const dbData = await dbResponse.json()
   const database = dbData.databases[0]
+  console.log(`📊 Database: ${database.name}`)
   
-  // Get role details  
-  const roleResponse = await fetch(`${NEON_API_BASE}/projects/${projectId}/branches/${branchId}/roles`, {
-    headers: { 'Authorization': `Bearer ${apiKey}` }
-  })
+  // First, try to wait for role password to be available
+  let role = await waitForRolePassword(projectId, branchId, apiKey)
   
-  const roleData = await roleResponse.json()
-  const role = roleData.roles[0]
+  // If no password available, try to reset it
+  if (!role || !role.password) {
+    console.log('🔄 Attempting to reset role password...')
+    try {
+      // Get role name first
+      const roleResponse = await fetch(`${NEON_API_BASE}/projects/${projectId}/branches/${branchId}/roles`, {
+        headers: { 'Authorization': `Bearer ${apiKey}` }
+      })
+      const roleData = await roleResponse.json()
+      const roleName = roleData.roles[0]?.name
+      
+      if (roleName) {
+        role = await resetRolePassword(projectId, branchId, roleName, apiKey)
+      }
+    } catch (resetError) {
+      console.log(`⚠️  Password reset failed: ${resetError.message}`)
+    }
+  }
   
-  if (!role.password) {
-    console.log('⚠️  Warning: No password found for role, using production password')
-    // Use production password from environment
+  // Final fallback to production password if all else fails
+  if (!role || !role.password) {
+    console.log('⚠️  Using production password as final fallback')
     const productionPassword = envVars.DATABASE_URL?.match(/\/\/[^:]+:([^@]+)@/)?.[1] || process.env.DATABASE_URL?.match(/\/\/[^:]+:([^@]+)@/)?.[1] || 'npg_dRjBwL2p6xMI'
+    
+    // Get role name
+    const roleResponse = await fetch(`${NEON_API_BASE}/projects/${projectId}/branches/${branchId}/roles`, {
+      headers: { 'Authorization': `Bearer ${apiKey}` }
+    })
+    const roleData = await roleResponse.json()
+    const roleName = roleData.roles[0]?.name || 'neondb_owner'
     
     // Add pooler suffix if not present
     const poolerHost = endpoint.host.includes('-pooler.') ? endpoint.host : endpoint.host.replace('.eu-central-1.aws.neon.tech', '-pooler.eu-central-1.aws.neon.tech')
     
-    return `postgresql://${role.name}:${productionPassword}@${poolerHost}/${database.name}?sslmode=require&channel_binding=require`
+    console.log(`⚠️  Final connection string using fallback password`)
+    return `postgresql://${roleName}:${productionPassword}@${poolerHost}/${database.name}?sslmode=require&channel_binding=require`
   }
+  
+  // Success! Use the retrieved branch-specific password
+  console.log(`✅ Using branch-specific password for role: ${role.name}`)
   
   // Add pooler suffix if not present
   const poolerHost = endpoint.host.includes('-pooler.') ? endpoint.host : endpoint.host.replace('.eu-central-1.aws.neon.tech', '-pooler.eu-central-1.aws.neon.tech')
