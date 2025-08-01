@@ -84,37 +84,70 @@ function commitAndPush(branchName, message) {
   }
 }
 
+async function getExistingVercelEnvironmentVariables(projectId, vercelToken) {
+  const response = await fetch(`${VERCEL_API_BASE}/v10/projects/${projectId}/env`, {
+    headers: { 'Authorization': `Bearer ${vercelToken}` }
+  })
+  
+  if (response.ok) {
+    const data = await response.json()
+    return data.envs || []
+  }
+  return []
+}
+
 async function setVercelEnvironmentVariables(projectId, branchName, envVars, vercelToken) {
   console.log(`🔄 Setting Vercel environment variables for branch: ${branchName}`)
   
+  // Get existing environment variables first
+  const existingVars = await getExistingVercelEnvironmentVariables(projectId, vercelToken)
+  
   for (const [key, value] of Object.entries(envVars)) {
-    const response = await fetch(`${VERCEL_API_BASE}/v10/projects/${projectId}/env`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${vercelToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        key,
-        value,
-        type: 'encrypted',
-        target: ['preview']
+    // Check if variable already exists
+    const existingVar = existingVars.find(env => env.key === key && env.target.includes('preview'))
+    
+    if (existingVar) {
+      // Update existing variable
+      console.log(`🔄 Updating existing variable: ${key}`)
+      const updateResponse = await fetch(`${VERCEL_API_BASE}/v9/projects/${projectId}/env/${existingVar.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${vercelToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          value,
+          target: ['preview']
+        })
       })
-    })
-
-    if (response.ok) {
-      console.log(`✅ Set ${key} for branch ${branchName}`)
-    } else {
-      // Variable might already exist, try to update it
-      const error = await response.text()
-      console.log(`❌ Failed to set ${key}: ${response.status} - ${error}`)
       
-      // Try to get more details about the error
-      try {
-        const errorData = JSON.parse(error)
-        console.log(`   Error details:`, errorData)
-      } catch (e) {
-        // Not JSON, just log the raw error
+      if (updateResponse.ok) {
+        console.log(`✅ Updated ${key} for branch ${branchName}`)
+      } else {
+        const error = await updateResponse.text()
+        console.log(`❌ Failed to update ${key}: ${updateResponse.status} - ${error}`)
+      }
+    } else {
+      // Create new variable
+      const response = await fetch(`${VERCEL_API_BASE}/v10/projects/${projectId}/env`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${vercelToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          key,
+          value,
+          type: 'encrypted',
+          target: ['preview']
+        })
+      })
+
+      if (response.ok) {
+        console.log(`✅ Created ${key} for branch ${branchName}`)
+      } else {
+        const error = await response.text()
+        console.log(`❌ Failed to create ${key}: ${response.status} - ${error}`)
       }
     }
   }
