@@ -139,7 +139,18 @@ async function runDatabaseMigrations() {
   console.log('🔄 Running feature branch database migrations...')
   
   try {
-    execSync('npm run db:push', { stdio: 'inherit' })
+    // Load DATABASE_URL from .env.local and set it explicitly
+    const envVars = loadEnvFile('.env.local')
+    const databaseUrl = envVars.DATABASE_URL
+    
+    if (!databaseUrl) {
+      throw new Error('DATABASE_URL not found in .env.local')
+    }
+    
+    execSync('npm run db:push', { 
+      stdio: 'inherit',
+      env: { ...process.env, DATABASE_URL: databaseUrl }
+    })
     console.log('✅ Database migrations completed')
   } catch (error) {
     console.error('❌ Database migration failed:', error.message)

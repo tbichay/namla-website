@@ -179,11 +179,20 @@ async function buildConnectionString(projectId, branchId, endpoint, apiKey) {
   const role = roleData.roles[0]
   
   if (!role.password) {
-    console.log('⚠️  Warning: No password found for role, using passwordless connection')
-    return `postgresql://${role.name}@${endpoint.host}/${database.name}?sslmode=require&channel_binding=require`
+    console.log('⚠️  Warning: No password found for role, using production password')
+    // Use production password from environment
+    const productionPassword = envVars.DATABASE_URL?.match(/:([^@]+)@/)?.[1] || 'npg_dRjBwL2p6xMI'
+    
+    // Add pooler suffix if not present
+    const poolerHost = endpoint.host.includes('-pooler.') ? endpoint.host : endpoint.host.replace('.eu-central-1.aws.neon.tech', '-pooler.eu-central-1.aws.neon.tech')
+    
+    return `postgresql://${role.name}:${productionPassword}@${poolerHost}/${database.name}?sslmode=require&channel_binding=require`
   }
   
-  return `postgresql://${role.name}:${role.password}@${endpoint.host}/${database.name}?sslmode=require&channel_binding=require`
+  // Add pooler suffix if not present
+  const poolerHost = endpoint.host.includes('-pooler.') ? endpoint.host : endpoint.host.replace('.eu-central-1.aws.neon.tech', '-pooler.eu-central-1.aws.neon.tech')
+  
+  return `postgresql://${role.name}:${role.password}@${poolerHost}/${database.name}?sslmode=require&channel_binding=require`
 }
 
 async function getBranchConnectionString(projectId, branchId, apiKey, envVars = {}) {
