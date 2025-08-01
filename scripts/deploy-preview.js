@@ -98,8 +98,7 @@ async function setVercelEnvironmentVariables(projectId, branchName, envVars, ver
         key,
         value,
         type: 'encrypted',
-        target: ['preview'],
-        gitBranch: branchName
+        target: ['preview']
       })
     })
 
@@ -108,7 +107,15 @@ async function setVercelEnvironmentVariables(projectId, branchName, envVars, ver
     } else {
       // Variable might already exist, try to update it
       const error = await response.text()
-      console.log(`⚠️  ${key} might already exist: ${error}`)
+      console.log(`❌ Failed to set ${key}: ${response.status} - ${error}`)
+      
+      // Try to get more details about the error
+      try {
+        const errorData = JSON.parse(error)
+        console.log(`   Error details:`, errorData)
+      } catch (e) {
+        // Not JSON, just log the raw error
+      }
     }
   }
 }
@@ -219,7 +226,25 @@ async function main() {
     // 4. Run database migrations for feature branch
     await runDatabaseMigrations()
     
-    // 5. Commit and push if there are changes
+    // 5. Set Vercel environment variables BEFORE deployment
+    if (envVars.VERCEL_TOKEN && envVars.VERCEL_PROJECT_ID) {
+      console.log('🔄 Setting Vercel environment variables via API...')
+      const branchEnvVars = loadEnvFile('.env')
+      await setVercelEnvironmentVariables(
+        envVars.VERCEL_PROJECT_ID,
+        currentBranch,
+        branchEnvVars,
+        envVars.VERCEL_TOKEN
+      )
+      console.log('✅ Vercel environment variables set')
+      console.log('⏳ Waiting 5 seconds for variables to propagate...')
+      await new Promise(resolve => setTimeout(resolve, 5000))
+    } else {
+      console.log('⚠️  Vercel API not configured - environment variables not set')
+      console.log('💡 Add VERCEL_TOKEN and VERCEL_PROJECT_ID to .env.local for automatic setup')
+    }
+    
+    // 6. Commit and push to trigger deployment
     if (hasUncommittedChanges()) {
       const commitMessage = generateCommitMessage(currentBranch)
       commitAndPush(currentBranch, commitMessage)
@@ -231,22 +256,6 @@ async function main() {
       } catch (error) {
         console.log('ℹ️  Nothing to push - branch is up to date')
       }
-    }
-    
-    // 6. Set Vercel environment variables via API
-    if (envVars.VERCEL_TOKEN && envVars.VERCEL_PROJECT_ID) {
-      console.log('🔄 Setting Vercel environment variables via API...')
-      const branchEnvVars = loadEnvFile('.env')
-      await setVercelEnvironmentVariables(
-        envVars.VERCEL_PROJECT_ID,
-        currentBranch,
-        branchEnvVars,
-        envVars.VERCEL_TOKEN
-      )
-      console.log('✅ Vercel environment variables set for preview deployment')
-    } else {
-      console.log('⚠️  Vercel API not configured - environment variables not set')
-      console.log('💡 Add VERCEL_TOKEN and VERCEL_PROJECT_ID to .env.local for automatic setup')
     }
 
     // 7. Wait for Vercel deployment
