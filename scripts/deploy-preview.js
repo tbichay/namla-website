@@ -158,6 +158,44 @@ async function runDatabaseMigrations() {
   }
 }
 
+async function deployWithEnvironmentVariables(branchEnvVars, vercelToken) {
+  console.log('🚀 Deploying to Vercel with branch-specific environment variables...')
+  
+  // Build the vercel deploy command with all environment variables
+  const buildEnvFlags = Object.entries(branchEnvVars)
+    .map(([key, value]) => `--build-env ${key}="${value}"`)
+    .join(' ')
+    
+  const deployCommand = `vercel deploy ${buildEnvFlags}${vercelToken ? ` --token ${vercelToken}` : ''} --yes`
+  
+  console.log(`📦 Deploying with ${Object.keys(branchEnvVars).length} environment variables`)
+  
+  try {
+    const output = execSync(deployCommand, { 
+      encoding: 'utf8',
+      stdio: 'pipe'
+    })
+    
+    // Extract deployment URL from output
+    const lines = output.split('\n')
+    const deploymentUrl = lines.find(line => line.match(/https:\/\/.*\.vercel\.app/))?.trim()
+    
+    if (deploymentUrl) {
+      console.log('✅ Deployment completed successfully!')
+      return deploymentUrl
+    } else {
+      console.log('✅ Deployment completed, but could not extract URL')
+      console.log('📄 Full output:', output)
+      return null
+    }
+  } catch (error) {
+    console.error('❌ Vercel deployment failed:', error.message)
+    if (error.stdout) console.log('📄 Stdout:', error.stdout)
+    if (error.stderr) console.log('📄 Stderr:', error.stderr)
+    throw error
+  }
+}
+
 
 async function main() {
   console.log('🚀 NAMLA Preview Deployment Starting...\n')
@@ -190,8 +228,8 @@ async function main() {
     // 4. Run database migrations for feature branch
     await runDatabaseMigrations()
     
-    // 5. Create .env.production file for Vercel (file-based approach)
-    console.log('📁 Creating .env.production file for Vercel...')
+    // 5. Load branch-specific environment variables for CLI deployment
+    console.log('📁 Loading branch environment variables for CLI deployment...')
     const branchEnvVars = loadEnvFile('.env')
     
     if (Object.keys(branchEnvVars).length === 0) {
@@ -200,42 +238,29 @@ async function main() {
       process.exit(1)
     }
     
-    // Write branch-specific variables to .env.production (Next.js loads this on Vercel)
-    const envContent = Object.entries(branchEnvVars)
-      .map(([key, value]) => `${key}="${value}"`)
-      .join('\n')
+    console.log(`✅ Loaded ${Object.keys(branchEnvVars).length} branch environment variables`)
     
-    fs.writeFileSync('.env.production', envContent + '\n')
-    console.log(`✅ Created .env.production with ${Object.keys(branchEnvVars).length} variables`)
-    console.log('💡 Next.js will automatically load .env.production on Vercel')
-    
-    // 6. Commit and push to trigger deployment
+    // 6. Commit changes if any (required for deployment)
     if (hasUncommittedChanges()) {
       const commitMessage = generateCommitMessage(currentBranch)
       commitAndPush(currentBranch, commitMessage)
     } else {
       console.log('ℹ️  No uncommitted changes detected')
-      console.log('🚀 Pushing to trigger deployment...')
-      try {
-        execSync(`git push origin ${currentBranch}`, { stdio: 'inherit' })
-      } catch (error) {
-        console.log('ℹ️  Nothing to push - branch is up to date')
-      }
     }
 
-    // 7. Wait for Vercel deployment
-    const previewUrl = await waitForVercelDeployment(
-      envVars.VERCEL_PROJECT_ID,
-      currentBranch,
+    // 7. Deploy directly with CLI environment variables
+    const previewUrl = await deployWithEnvironmentVariables(
+      branchEnvVars,
       envVars.VERCEL_TOKEN
     )
     
-    // 7. Show results
+    // 8. Show results
     console.log('\n✅ Preview deployment completed!')
     console.log(`\n📋 Summary:`)
     console.log(`   Branch: ${currentBranch}`)
     console.log(`   Database: Isolated feature branch database`)
     console.log(`   R2 Storage: branch-${currentBranch}/`)
+    console.log(`   Environment Variables: Passed via CLI (${Object.keys(branchEnvVars).length} variables)`)
     
     if (previewUrl) {
       console.log(`   Preview URL: ${previewUrl}`)
