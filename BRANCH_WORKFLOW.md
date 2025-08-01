@@ -44,16 +44,22 @@ npm run dev
 - 🔒 Eigene Vercel Preview URL
 - 🔒 Keine Beeinflussung der Production-Umgebung
 
-### 3. Push & Preview
+### 3. Preview Deployment
 
 ```bash
-git add .
-git commit -m "Add neue funktion"
-git push origin feature/neue-funktion
+# Automatisches Preview Deployment mit isolated Database
+npm run deploy:preview
 ```
 
+**Das Script führt aus:**
+- ✅ Validiert Feature Branch Setup
+- ✅ Führt Feature Branch Database Migrations aus
+- ✅ Committet und pusht aktuelle Änderungen
+- ✅ Überwacht Vercel Preview Deployment
+- ✅ Zeigt Preview URL an
+
 **Automatisch erstellt:**
-- 🚀 Vercel Preview Deployment
+- 🚀 Vercel Preview Deployment mit isolierter Database
 - 🚀 GitHub Actions laufen mit branch-spezifischen Variablen
 - 🚀 Preview URL: `https://namla-website-git-feature-neue-funktion-tombichay.vercel.app`
 
@@ -64,20 +70,31 @@ git push origin feature/neue-funktion
 - 🧪 **Vercel Preview**: Automatische URL mit Branch-DB  
 - 🧪 **Production**: Unverändert auf `namla.de`
 
-### 5. Merge & Cleanup
+### 5. Production Deployment
 
 ```bash
-# Pull Request mergen (via GitHub UI)
-# Danach automatisches Cleanup oder manuell:
+# Automatisches Production Deployment
+npm run deploy:prod
+```
 
-npm run branch:cleanup
-# oder für anderen Branch:
-npm run branch:cleanup feature/andere-funktion
+**Das Script führt aus:**
+- ✅ Committet aktuelle Änderungen 
+- ✅ Wechselt zu Main Branch und mergt Feature
+- ✅ Führt Production Database Migrations aus
+- ✅ Pusht zu Production
+- ✅ Überwacht Production Deployment
+- ✅ Optional: Branch Cleanup mit Bestätigung
+
+### 6. Manual Cleanup (optional)
+
+```bash
+# Manuelles Cleanup falls nicht automatisch gemacht
+npm run branch:cleanup feature/neue-funktion
 ```
 
 Das `branch:cleanup` Script:
 - 🧹 Löscht Neon Database Branch
-- 🧹 Entfernt lokale `.env.feature/neue-funktion`
+- 🧹 Stellt Original `.env.local` wieder her
 - 🧹 Löscht Vercel Environment Variablen
 - 🧹 R2 Ordner bleibt für Debugging (manuell löschbar)
 
@@ -127,8 +144,9 @@ vercel ls
 
 **Automatische Branch-Erstellung:**
 - Erkennt aktuellen Git Branch
-- Erstellt Neon Database Branch
-- Setzt lokale Environment-Datei
+- Erstellt Neon Database Branch mit Endpoint
+- Konfiguriert `.env.local` mit Branch-Variablen
+- Erstellt Backup der Original-Konfiguration
 - Konfiguriert Vercel Variables via API
 - Führt Database Migrations aus
 
@@ -140,18 +158,64 @@ vercel ls
    Branch: feature/neue-funktion  
    Database: feature/neue-funktion
    R2 Folder: branch-feature/neue-funktion/
-   Local Env: .env.feature/neue-funktion
+   Environment: .env.local (backed up)
+   Vercel Preview: Same configuration as local
 
-🔄 To use this branch:
-   cp .env.feature/neue-funktion .env.local
-   npm run dev
+🚀 Ready to use:
+   npm run dev  # Uses branch database & isolated R2
+```
+
+### `npm run deploy:preview`
+
+**Automatisches Preview Deployment:**
+- Validiert Feature Branch Setup
+- Führt Feature Branch Database Migrations aus
+- Committet und pusht aktuelle Änderungen
+- Überwacht Vercel Preview Deployment
+- Zeigt Preview URL an
+
+**Ausgabe-Beispiel:**
+```
+✅ Preview deployment completed!
+
+📋 Summary:
+   Branch: feature/neue-funktion
+   Database: Isolated feature branch database
+   Preview URL: https://namla-website-git-feature-neue-funktion-tombichay.vercel.app
+
+🎯 Next steps:
+   1. Test your feature on the preview URL
+   2. If everything works: npm run deploy:prod
+```
+
+### `npm run deploy:prod`
+
+**Automatisches Production Deployment:**
+- Committet aktuelle Änderungen
+- Wechselt zu Main Branch und mergt Feature
+- Führt Production Database Migrations aus
+- Pusht zu Production
+- Überwacht Production Deployment
+- Optional: Branch Cleanup mit Bestätigung
+
+**Ausgabe-Beispiel:**
+```
+✅ Production deployment completed!
+
+📋 Summary:
+   Feature Branch: feature/neue-funktion
+   Merged to: main
+   Status: Live on production
+   Production URL: https://namla.de
+
+🧹 Clean up feature branch resources? (y/N):
 ```
 
 ### `npm run branch:cleanup`
 
 **Automatisches Cleanup:**
 - Löscht Neon Database Branch
-- Entfernt lokale Environment-Datei  
+- Stellt Original `.env.local` aus Backup wieder her
 - Löscht Vercel Environment Variablen
 - Bestätigungsprompt (außer mit `--force`)
 
