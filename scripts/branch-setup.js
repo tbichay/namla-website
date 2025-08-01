@@ -181,7 +181,7 @@ async function buildConnectionString(projectId, branchId, endpoint, apiKey, envV
   if (!role.password) {
     console.log('⚠️  Warning: No password found for role, using production password')
     // Use production password from environment
-    const productionPassword = envVars.DATABASE_URL?.match(/:([^@]+)@/)?.[1] || process.env.DATABASE_URL?.match(/:([^@]+)@/)?.[1] || 'npg_dRjBwL2p6xMI'
+    const productionPassword = envVars.DATABASE_URL?.match(/\/\/[^:]+:([^@]+)@/)?.[1] || process.env.DATABASE_URL?.match(/\/\/[^:]+:([^@]+)@/)?.[1] || 'npg_dRjBwL2p6xMI'
     
     // Add pooler suffix if not present
     const poolerHost = endpoint.host.includes('-pooler.') ? endpoint.host : endpoint.host.replace('.eu-central-1.aws.neon.tech', '-pooler.eu-central-1.aws.neon.tech')
