@@ -190,7 +190,26 @@ async function main() {
     // 4. Run database migrations for feature branch
     await runDatabaseMigrations()
     
-    // 5. Commit and push if there are changes
+    // 5. Create .env.production file for Vercel (file-based approach)
+    console.log('📁 Creating .env.production file for Vercel...')
+    const branchEnvVars = loadEnvFile('.env')
+    
+    if (Object.keys(branchEnvVars).length === 0) {
+      console.error('❌ No .env file found with branch configuration')
+      console.log('💡 Make sure npm run branch:setup created the .env file')
+      process.exit(1)
+    }
+    
+    // Write branch-specific variables to .env.production (Next.js loads this on Vercel)
+    const envContent = Object.entries(branchEnvVars)
+      .map(([key, value]) => `${key}="${value}"`)
+      .join('\n')
+    
+    fs.writeFileSync('.env.production', envContent + '\n')
+    console.log(`✅ Created .env.production with ${Object.keys(branchEnvVars).length} variables`)
+    console.log('💡 Next.js will automatically load .env.production on Vercel')
+    
+    // 6. Commit and push to trigger deployment
     if (hasUncommittedChanges()) {
       const commitMessage = generateCommitMessage(currentBranch)
       commitAndPush(currentBranch, commitMessage)
@@ -203,9 +222,6 @@ async function main() {
         console.log('ℹ️  Nothing to push - branch is up to date')
       }
     }
-    
-    // 6. .env file will be automatically used by Vercel for preview deployment
-    console.log('✅ .env file will be committed and used by Vercel preview deployment')
 
     // 7. Wait for Vercel deployment
     const previewUrl = await waitForVercelDeployment(
