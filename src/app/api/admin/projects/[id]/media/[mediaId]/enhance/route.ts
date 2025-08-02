@@ -40,7 +40,7 @@ export async function POST(
       )
     }
 
-    const { preset, provider, operations } = await request.json()
+    const { preset, provider, operations, style_transfer, reference_image_url } = await request.json()
 
     // Get enhancement options
     let enhancementOptions
@@ -53,34 +53,50 @@ export async function POST(
           { status: 400 }
         )
       }
+      
+      // Enable style transfer if requested
+      if (style_transfer) {
+        enhancementOptions = {
+          ...enhancementOptions,
+          operations: {
+            ...enhancementOptions.operations,
+            style_transfer: true
+          },
+          style_reference: reference_image_url
+        }
+      }
     } else {
       enhancementOptions = {
-        provider: provider || 'autoenhance',
-        operations: operations || {},
+        provider: provider || 'replicate',
+        operations: {
+          ...operations,
+          style_transfer: style_transfer || false
+        },
         quality: 'standard',
-        output_format: 'webp'
+        output_format: 'png',
+        style_reference: reference_image_url
       }
     }
 
+    console.log('🚀 Starting enhancement with options:', enhancementOptions)
+    
     // Enhance the image
     const enhancementResult = await AIEnhancementService.enhanceImage(
       targetMedia.url,
       enhancementOptions
     )
 
+    console.log('📊 Enhancement result:', enhancementResult)
+
     if (!enhancementResult.success) {
+      console.error('❌ Enhancement failed:', enhancementResult.error)
       return NextResponse.json(
         { error: enhancementResult.error || 'Enhancement failed' },
         { status: 500 }
       )
     }
 
-    // In a real implementation, you would:
-    // 1. Upload the enhanced image to R2
-    // 2. Update the database record with the new URL
-    // 3. Optionally keep the original as backup
-    
-    // For now, we'll return the enhancement result
+    // Return the enhancement result
     return NextResponse.json({
       message: 'Image enhanced successfully',
       enhancement: {
@@ -169,7 +185,11 @@ function getPresetDescription(presetName: string): string {
     'real_estate_standard': 'AI-powered basic lighting correction, noise reduction, and quality enhancement using OpenAI for property photos.',
     'real_estate_premium': 'AI-powered complete real estate enhancement using OpenAI including sky replacement, HDR processing, and professional color grading.',
     'high_resolution': 'AI-powered image enhancement using OpenAI with advanced detail enhancement and sharpening.',
-    'quick_fix': 'Fast AI enhancement using OpenAI focusing on lighting and basic quality improvements for quick turnaround.'
+    'quick_fix': 'Fast AI enhancement using OpenAI focusing on lighting and basic quality improvements for quick turnaround.',
+    'ai_upscale': 'Real AI-powered image upscaling using Replicate models that preserve original content while improving resolution and quality.',
+    'ai_enhance': 'Real AI-powered image enhancement using Replicate models focusing on sharpness, lighting, and quality improvements without changing content.',
+    'style_transfer_luxury': 'Advanced AI style transfer that applies luxury real estate photography styling while preserving original composition and structure.',
+    'real_estate_pro': 'Professional real estate enhancement using multi-model AI pipeline for optimal lighting, quality, and perspective correction.'
   }
   return descriptions[presetName] || 'Custom enhancement preset'
 }

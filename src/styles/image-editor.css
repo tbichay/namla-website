@@ -1,0 +1,112 @@
+/* Image Editor Mobile & Scrolling Optimizations */
+
+/* Custom scrollbar for dark theme */
+.image-editor-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.image-editor-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.image-editor-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.image-editor-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.image-editor-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Hide scrollbar on mobile */
+@media (max-width: 640px) {
+  .image-editor-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .image-editor-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}
+
+/* Horizontal tab scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile touch optimizations */
+@media (max-width: 768px) {
+  .touch-slider input[type="range"] {
+    height: 44px;
+    min-height: 44px;
+  }
+  
+  .touch-slider input[type="range"]::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .touch-slider input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Momentum scrolling for iOS */
+.momentum-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Smooth tab transitions */
+.tab-transition {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Active states for touch */
+@media (hover: none) {
+  .touch-active:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Safe area for notched devices */
+@supports (padding: max(0px)) {
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .tab-transition,
+  .touch-active {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .image-editor-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.8);
+  }
+  
+  .border-white\/20 {
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+}

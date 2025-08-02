@@ -142,11 +142,17 @@ export class ProjectService {
 export class ProjectImageService {
   // Get images for a project
   static async getProjectImages(projectId: string): Promise<ProjectImage[]> {
-    return await db
+    const images = await db
       .select()
       .from(projectImages)
       .where(eq(projectImages.projectId, projectId))
       .orderBy(asc(projectImages.sortOrder), asc(projectImages.createdAt))
+    
+    // Ensure main image is always first
+    const mainImage = images.find(img => img.isMainImage)
+    const otherImages = images.filter(img => !img.isMainImage)
+    
+    return mainImage ? [mainImage, ...otherImages] : images
   }
 
   // Upload and create project image
@@ -194,6 +200,12 @@ export class ProjectImageService {
     return result[0]
   }
 
+  // Get project image by ID
+  static async getProjectImageById(id: string): Promise<ProjectImage | null> {
+    const result = await db.select().from(projectImages).where(eq(projectImages.id, id)).limit(1)
+    return result[0] || null
+  }
+
   // Update image metadata
   static async updateProjectImage(
     id: string,
@@ -213,6 +225,52 @@ export class ProjectImageService {
     const result = await db
       .update(projectImages)
       .set(data)
+      .where(eq(projectImages.id, id))
+      .returning()
+
+    return result[0] || null
+  }
+
+  // Update image URL after editing (preserves original URL)
+  static async updateProjectImageUrl(
+    id: string,
+    newUrl: string,
+    editMetadata?: {
+      operations?: string[]
+      editedAt?: Date
+    }
+  ): Promise<ProjectImage | null> {
+    // Get current image to preserve original URL
+    const currentImage = await db.select().from(projectImages).where(eq(projectImages.id, id)).limit(1)
+    if (!currentImage[0]) return null
+
+    // If this is the first edit, preserve the current URL as originalUrl
+    const originalUrl = currentImage[0].originalUrl || currentImage[0].url
+
+    const updateData: any = {
+      url: newUrl,
+      originalUrl: originalUrl
+    }
+
+    const result = await db
+      .update(projectImages)
+      .set(updateData)
+      .where(eq(projectImages.id, id))
+      .returning()
+
+    return result[0] || null
+  }
+
+  // Revert image to original URL
+  static async revertProjectImageToOriginal(id: string): Promise<ProjectImage | null> {
+    const currentImage = await db.select().from(projectImages).where(eq(projectImages.id, id)).limit(1)
+    if (!currentImage[0] || !currentImage[0].originalUrl) return null
+
+    const result = await db
+      .update(projectImages)
+      .set({
+        url: currentImage[0].originalUrl
+      })
       .where(eq(projectImages.id, id))
       .returning()
 

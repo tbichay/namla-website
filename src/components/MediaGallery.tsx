@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { createPortal } from 'react-dom'
+import VideoPlayer from '@/components/ui/VideoPlayer'
 
 interface MediaItem {
   id: string
@@ -12,6 +13,7 @@ interface MediaItem {
   caption?: string
   isMainImage?: boolean
   sortOrder?: number
+  projectId?: string
 }
 
 interface MediaGalleryProps {
@@ -111,13 +113,17 @@ function Lightbox({ items, currentIndex, onClose, onNext, onPrev, projectName }:
               priority
             />
           ) : (
-            <video
+            <VideoPlayer
               src={currentItem.url}
-              controls
+              alt={currentItem.alt || `${projectName} - Video ${currentIndex + 1}`}
               className="max-w-full max-h-full"
+              controls
               autoPlay
               muted
-              aria-label={`${projectName} - Video ${currentIndex + 1}`}
+              preload="metadata"
+              autoGeneratePoster
+              projectId={currentItem.projectId}
+              mediaId={currentItem.id}
             />
           )}
         </div>
@@ -201,15 +207,28 @@ export default function MediaGallery({ items, projectName }: MediaGalleryProps) 
             </>
           ) : (
             <>
-              <video
+              <VideoPlayer
                 src={currentItem.url}
-                className="w-full h-full object-cover"
+                className="w-full h-full"
+                controls={false}
                 muted
-                onMouseEnter={(e) => e.currentTarget.play()}
-                onMouseLeave={(e) => e.currentTarget.pause()}
+                preload="metadata"
+                autoGeneratePoster
+                projectId={currentItem.projectId}
+                mediaId={currentItem.id}
+                onMouseEnter={() => {
+                  // Auto-play on hover for preview
+                  const video = document.querySelector(`video[src="${currentItem.url}"]`) as HTMLVideoElement
+                  if (video) video.play()
+                }}
+                onMouseLeave={() => {
+                  // Pause on mouse leave
+                  const video = document.querySelector(`video[src="${currentItem.url}"]`) as HTMLVideoElement
+                  if (video) video.pause()
+                }}
               />
               {/* Play Indicator */}
-              <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/20 flex items-center justify-center pointer-events-none">
                 <div className="bg-white/90 p-3 rounded-full">
                   <svg className="w-8 h-8 text-gray-800" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>

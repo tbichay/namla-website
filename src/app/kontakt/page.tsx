@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Button from '@/components/ui/Button'
+import Map from '@/components/ui/Map'
 
 interface TurnstileOptions {
   sitekey: string
@@ -250,8 +251,25 @@ export default function ContactPage() {
 
             <div className="bg-white rounded-lg shadow-sm p-6 sm:p-8">
               <h3 className="text-lg sm:text-xl font-semibold text-stone-800 mb-4">Unser Standort</h3>
-              <div className="aspect-[4/3] bg-stone-100 flex items-center justify-center rounded-sm">
-                <span className="text-stone-400 text-sm sm:text-lg">Karten Platzhalter</span>
+              <Map 
+                coordinates={{ lat: 48.4010, lng: 9.9876 }}
+                zoom={16}
+                height="320px"
+                address="NAMLA GmbH, Zeitblomstr. 31/2, 89073 Ulm"
+                className="rounded-lg overflow-hidden"
+              />
+              <div className="mt-4 p-3 bg-stone-50 rounded-lg">
+                <p className="text-sm text-stone-600 text-center">
+                  📍 Zeitblomstr. 31/2, 89073 Ulm • 
+                  <a 
+                    href="https://maps.google.com/?q=Zeitblomstr.+31/2,+89073+Ulm" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-amber-600 hover:text-amber-700 ml-1 font-medium"
+                  >
+                    In Google Maps öffnen
+                  </a>
+                </p>
               </div>
             </div>
           </div>

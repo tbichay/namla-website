@@ -95,6 +95,7 @@ export const projectImages = pgTable('project_images', {
   filename: varchar('filename', { length: 255 }).notNull(),
   originalName: varchar('original_name', { length: 255 }),
   url: varchar('url', { length: 1000 }).notNull(),
+  originalUrl: varchar('original_url', { length: 1000 }), // Backup original URL before AI enhancement
   alt: varchar('alt', { length: 255 }),
   caption: varchar('caption', { length: 500 }),
   sortOrder: decimal('sort_order', { precision: 5, scale: 2 }).default('0'),

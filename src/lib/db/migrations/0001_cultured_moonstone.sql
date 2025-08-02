@@ -1,0 +1,1 @@
+ALTER TABLE "project_images" ADD COLUMN "original_url" varchar(1000);

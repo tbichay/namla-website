@@ -127,13 +127,17 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const isHistoricalProject = (project: ProjectData) => 
     project.status === 'fertiggestellt'
 
-  // Sort media by sortOrder and isMainImage
+  // Sort media by sortOrder and isMainImage, and add projectId for video thumbnails
   const sortedMedia = project.media
     .sort((a, b) => {
       if (a.isMainImage && !b.isMainImage) return -1
       if (!a.isMainImage && b.isMainImage) return 1
       return Number(a.sortOrder) - Number(b.sortOrder)
     })
+    .map(item => ({
+      ...item,
+      projectId: project.id
+    }))
 
   return (
     <div className="bg-stone-50 min-h-screen">

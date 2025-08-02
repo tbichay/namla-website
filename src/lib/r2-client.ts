@@ -27,17 +27,32 @@ export const r2Client = new S3Client({
 
 // Get storage prefix based on current branch
 export const getStoragePrefix = (): string => {
-  // Priority: GitHub head ref > GitHub ref name > local branch > fallback to main
+  // Priority: GitHub head ref > GitHub ref name > Vercel git ref > local branch env > fallback to main
   const branch = 
     process.env.GITHUB_HEAD_REF || 
     process.env.GITHUB_REF_NAME?.replace('refs/heads/', '') ||
     process.env.VERCEL_GIT_COMMIT_REF ||
+    process.env.BRANCH_NAME ||
     'main'
   
-  return branch === 'main' ? 'main' : `branch-${branch}`
+  const prefix = branch === 'main' ? 'main' : `branch-${branch}`
+  
+  // Debug logging for development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 R2 Storage Debug:', {
+      GITHUB_HEAD_REF: process.env.GITHUB_HEAD_REF,
+      GITHUB_REF_NAME: process.env.GITHUB_REF_NAME,
+      VERCEL_GIT_COMMIT_REF: process.env.VERCEL_GIT_COMMIT_REF,
+      BRANCH_NAME: process.env.BRANCH_NAME,
+      detected_branch: branch,
+      storage_prefix: prefix
+    })
+  }
+  
+  return prefix
 }
 
-// Generate file path with branch prefix
+// Generate file path with branch prefix (legacy - use storage-paths.ts for new code)
 export const getFilePath = (folder: string, filename: string): string => {
   const prefix = getStoragePrefix()
   return `${prefix}/${folder}/${filename}`
