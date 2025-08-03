@@ -145,28 +145,28 @@ export default function NewProjectPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header - Mobile Optimized */}
+      <div className="flex items-center gap-3 sm:gap-4">
         <Link href="/admin/projects">
-          <ShadcnButton variant="ghost" size="icon">
+          <ShadcnButton variant="ghost" size="icon" className="flex-shrink-0">
             <ArrowLeft className="h-4 w-4" />
           </ShadcnButton>
         </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-stone-900">Neues Projekt</h1>
-          <p className="text-stone-600 mt-2">Erstellen Sie ein neues Immobilienprojekt</p>
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-stone-900 break-words">Neues Projekt</h1>
+          <p className="text-stone-600 mt-1 sm:mt-2 text-sm sm:text-base">Erstellen Sie ein neues Immobilienprojekt</p>
         </div>
       </div>
 
-      <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-6">
+      <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4 sm:space-y-6">
         {/* Basic Information */}
         <Card>
-          <CardHeader>
-            <CardTitle>Grundinformationen</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Grundinformationen</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+          <CardContent className="space-y-4 p-4 sm:p-6">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
                   Projektname *
@@ -202,7 +202,7 @@ export default function NewProjectPage() {
               />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
                   Status *
@@ -277,11 +277,11 @@ export default function NewProjectPage() {
 
         {/* Property Details */}
         <Card>
-          <CardHeader>
-            <CardTitle>Objektdetails</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Objektdetails</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-3">
+          <CardContent className="space-y-4 p-4 sm:p-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
                   Zimmer
@@ -316,7 +316,7 @@ export default function NewProjectPage() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
                   Wohnfläche
@@ -391,10 +391,10 @@ export default function NewProjectPage() {
 
         {/* SEO */}
         <Card>
-          <CardHeader>
-            <CardTitle>SEO & Meta-Daten</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">SEO & Meta-Daten</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 p-4 sm:p-6">
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1">
                 Meta-Titel
@@ -425,10 +425,10 @@ export default function NewProjectPage() {
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3">
-          <Link href="/admin/projects">
-            <ShadcnButton variant="outline" type="button">
+        {/* Actions - Mobile Optimized */}
+        <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
+          <Link href="/admin/projects" className="order-3 sm:order-1">
+            <ShadcnButton variant="outline" type="button" className="w-full sm:w-auto">
               Abbrechen
             </ShadcnButton>
           </Link>
@@ -436,6 +436,7 @@ export default function NewProjectPage() {
             type="submit"
             disabled={loading}
             variant="outline"
+            className="w-full sm:w-auto order-2"
           >
             <Save className="mr-2 h-4 w-4" />
             {loading ? 'Speichern...' : 'Als Entwurf speichern'}
@@ -444,6 +445,7 @@ export default function NewProjectPage() {
             type="button"
             onClick={(e) => handleSubmit(e, true)}
             disabled={loading}
+            className="w-full sm:w-auto order-1 sm:order-3"
           >
             <Eye className="mr-2 h-4 w-4" />
             {loading ? 'Veröffentlichen...' : 'Veröffentlichen'}

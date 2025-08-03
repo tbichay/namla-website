@@ -572,18 +572,20 @@ interface UploadedDocument {
   return (
     <div className="min-h-screen bg-stone-50">
       <RequestDebugger />
-      <div className="space-y-6 max-w-4xl mx-auto p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+      <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto p-4 sm:p-6">
+        {/* Header - Mobile Optimized */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             <Link href="/admin/projects">
-              <ShadcnButton variant="ghost" size="icon">
+              <ShadcnButton variant="ghost" size="icon" className="flex-shrink-0">
                 <ArrowLeft className="h-4 w-4" />
               </ShadcnButton>
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-stone-900">Projekt bearbeiten</h1>
-              <p className="text-stone-600 mt-2">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-stone-900 break-words">
+                Projekt bearbeiten
+              </h1>
+              <p className="text-stone-600 mt-1 sm:mt-2 text-sm sm:text-base">
                 Bearbeiten Sie die Details Ihres Immobilienprojekts
               </p>
             </div>
@@ -597,14 +599,14 @@ interface UploadedDocument {
         )}
 
         {/* Form */}
-        <div className="grid gap-6">
+        <div className="grid gap-4 sm:gap-6">
           {/* Basic Information */}
           <Card>
-            <CardHeader>
-              <CardTitle>Grundinformationen</CardTitle>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">Grundinformationen</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-4 p-4 sm:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-2">
                     Projektname *
@@ -614,6 +616,7 @@ interface UploadedDocument {
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     placeholder="z.B. Villa Zeitblom"
                     required
+                    className="w-full"
                   />
                 </div>
                 <div>
@@ -625,6 +628,7 @@ interface UploadedDocument {
                     onChange={(e) => handleInputChange('location', e.target.value)}
                     placeholder="z.B. Ulm-Söflingen"
                     required
+                    className="w-full"
                   />
                 </div>
               </div>
@@ -637,10 +641,11 @@ interface UploadedDocument {
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
                   placeholder="z.B. Zeitblomstraße 31, 89073 Ulm"
+                  className="w-full"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-2">
                     Status *
@@ -648,6 +653,7 @@ interface UploadedDocument {
                   <Select
                     value={formData.status}
                     onChange={(e) => handleInputChange('status', e.target.value)}
+                    className="w-full"
                   >
                     <option value="verfügbar">Verfügbar</option>
                     <option value="verkauft">Verkauft</option>
@@ -663,6 +669,7 @@ interface UploadedDocument {
                   <Select
                     value={formData.type}
                     onChange={(e) => handleInputChange('type', e.target.value)}
+                    className="w-full"
                   >
                     <option value="einfamilienhaus">Einfamilienhaus</option>
                     <option value="mehrfamilienhaus">Mehrfamilienhaus</option>
@@ -681,6 +688,7 @@ interface UploadedDocument {
                     value={formData.priceFrom}
                     onChange={(e) => handleInputChange('priceFrom', e.target.value)}
                     placeholder="z.B. 850000"
+                    className="w-full"
                   />
                 </div>
               </div>
@@ -689,10 +697,10 @@ interface UploadedDocument {
 
           {/* Descriptions */}
           <Card>
-            <CardHeader>
-              <CardTitle>Beschreibungen</CardTitle>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">Beschreibungen</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 sm:p-6">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-2">
                   Kurzbeschreibung
@@ -702,6 +710,7 @@ interface UploadedDocument {
                   onChange={(e) => handleInputChange('shortDescription', e.target.value)}
                   placeholder="Kurze Zusammenfassung für Kartenansicht"
                   rows={2}
+                  className="w-full"
                 />
               </div>
               <div>
@@ -713,6 +722,7 @@ interface UploadedDocument {
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   placeholder="Ausführliche Beschreibung des Projekts"
                   rows={4}
+                  className="w-full"
                 />
               </div>
             </CardContent>
@@ -720,11 +730,11 @@ interface UploadedDocument {
 
           {/* Property Details */}
           <Card>
-            <CardHeader>
-              <CardTitle>Objektdetails</CardTitle>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">Objektdetails</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <CardContent className="space-y-4 p-4 sm:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-2">
                     Zimmer
@@ -759,7 +769,7 @@ interface UploadedDocument {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-2">
                     Wohnfläche
@@ -1191,13 +1201,14 @@ interface UploadedDocument {
 
           {/* Actions */}
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row gap-4 justify-between">
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                   <ShadcnButton
                     onClick={() => handleSubmit(false)}
                     disabled={loading || !formData.name || !formData.location}
                     variant="outline"
+                    className="w-full sm:w-auto"
                   >
                     {loading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -1210,6 +1221,7 @@ interface UploadedDocument {
                   <ShadcnButton
                     onClick={() => handleSubmit(true)}
                     disabled={loading || !formData.name || !formData.location}
+                    className="w-full sm:w-auto"
                   >
                     {loading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
