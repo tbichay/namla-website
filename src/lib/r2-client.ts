@@ -59,6 +59,29 @@ export const getFilePath = (folder: string, filename: string): string => {
   return `${prefix}/${folder}/${filename}`
 }
 
+// Get base URL for the current environment (protocol-aware)
+const getBaseUrl = (): string => {
+  // In production/preview, use VERCEL_URL with https
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+  
+  // Use NEXTAUTH_URL but ensure correct protocol for deployment
+  if (process.env.NEXTAUTH_URL) {
+    const url = process.env.NEXTAUTH_URL
+    // If we're in a deployment environment but NEXTAUTH_URL is still localhost, 
+    // it means we need to construct the proper URL
+    if (url.includes('localhost') && process.env.NODE_ENV === 'production') {
+      // This shouldn't happen in properly configured deployments, but fallback gracefully
+      return url.replace('http://', 'https://')
+    }
+    return url
+  }
+  
+  // Development fallback
+  return 'http://localhost:3000'
+}
+
 // Upload file to R2
 export const uploadToR2 = async (
   file: Buffer | Uint8Array | string,
@@ -81,7 +104,7 @@ export const uploadToR2 = async (
   
   // Use our internal API route to serve the media
   // This works regardless of R2 bucket permissions
-  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+  const baseUrl = getBaseUrl()
   return `${baseUrl}/api/media/${key}`
 }
 
