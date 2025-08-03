@@ -17,8 +17,10 @@ import {
   EyeOff,
   Building2,
   MapPin,
-  Euro
+  Euro,
+  Loader2
 } from 'lucide-react'
+import toast from 'react-hot-toast'
 import type { Project } from '@/lib/db'
 
 export default function ProjectsPage() {
@@ -27,6 +29,8 @@ export default function ProjectsPage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [publishedFilter, setPublishedFilter] = useState('')
+  const [togglingProjects, setTogglingProjects] = useState<Set<string>>(new Set())
+  const [deletingProjects, setDeletingProjects] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     fetchProjects()
@@ -45,32 +49,81 @@ export default function ProjectsPage() {
       
       if (response.ok) {
         setProjects(data.projects || [])
+      } else {
+        toast.error('Fehler beim Laden der Projekte')
       }
     } catch (error) {
       console.error('Error fetching projects:', error)
+      toast.error('Fehler beim Laden der Projekte')
     } finally {
       setLoading(false)
     }
   }
 
   const toggleProjectStatus = async (projectId: string) => {
+    // Find the project
+    const project = projects.find(p => p.id === projectId)
+    if (!project) return
+
+    // Add to toggling set
+    setTogglingProjects(prev => new Set(prev).add(projectId))
+
+    // Optimistic update
+    const newStatus = !project.isPublished
+    setProjects(prev => prev.map(p => 
+      p.id === projectId 
+        ? { ...p, isPublished: newStatus, publishedAt: newStatus ? new Date() : null }
+        : p
+    ))
+
     try {
       const response = await fetch(`/api/admin/projects/${projectId}/toggle`, {
         method: 'POST'
       })
       
       if (response.ok) {
-        fetchProjects() // Refresh the list
+        const data = await response.json()
+        toast.success(`Projekt ${newStatus ? 'veröffentlicht' : 'versteckt'}`)
+        
+        // Update with server response
+        setProjects(prev => prev.map(p => 
+          p.id === projectId ? data.project : p
+        ))
+      } else {
+        // Revert optimistic update
+        setProjects(prev => prev.map(p => 
+          p.id === projectId 
+            ? { ...p, isPublished: project.isPublished, publishedAt: project.publishedAt }
+            : p
+        ))
+        toast.error('Fehler beim Ändern der Sichtbarkeit')
       }
     } catch (error) {
+      // Revert optimistic update
+      setProjects(prev => prev.map(p => 
+        p.id === projectId 
+          ? { ...p, isPublished: project.isPublished, publishedAt: project.publishedAt }
+          : p
+      ))
       console.error('Error toggling project status:', error)
+      toast.error('Fehler beim Ändern der Sichtbarkeit')
+    } finally {
+      // Remove from toggling set
+      setTogglingProjects(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(projectId)
+        return newSet
+      })
     }
   }
 
   const deleteProject = async (projectId: string, projectName: string) => {
-    if (!confirm(`Sind Sie sicher, dass Sie das Projekt "${projectName}" löschen möchten?`)) {
+    if (!confirm(`Sind Sie sicher, dass Sie das Projekt "${projectName}" permanent löschen möchten?\n\nDiese Aktion kann nicht rückgängig gemacht werden.`)) {
       return
     }
+
+    // Add to deleting set
+    setDeletingProjects(prev => new Set(prev).add(projectId))
 
     try {
       const response = await fetch(`/api/admin/projects/${projectId}`, {
@@ -78,10 +131,23 @@ export default function ProjectsPage() {
       })
       
       if (response.ok) {
-        fetchProjects() // Refresh the list
+        // Remove from local state
+        setProjects(prev => prev.filter(p => p.id !== projectId))
+        toast.success(`Projekt "${projectName}" wurde gelöscht`)
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Fehler beim Löschen des Projekts')
       }
     } catch (error) {
       console.error('Error deleting project:', error)
+      toast.error('Fehler beim Löschen des Projekts')
+    } finally {
+      // Remove from deleting set
+      setDeletingProjects(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(projectId)
+        return newSet
+      })
     }
   }
 
@@ -260,8 +326,11 @@ export default function ProjectsPage() {
                       size="icon"
                       onClick={() => toggleProjectStatus(project.id)}
                       title={project.isPublished ? 'Verstecken' : 'Veröffentlichen'}
+                      disabled={togglingProjects.has(project.id)}
                     >
-                      {project.isPublished ? (
+                      {togglingProjects.has(project.id) ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : project.isPublished ? (
                         <EyeOff className="h-4 w-4" />
                       ) : (
                         <Eye className="h-4 w-4" />
@@ -279,8 +348,13 @@ export default function ProjectsPage() {
                       size="icon"
                       onClick={() => deleteProject(project.id, project.name)}
                       title="Löschen"
+                      disabled={deletingProjects.has(project.id)}
                     >
-                      <Trash2 className="h-4 w-4 text-red-600" />
+                      {deletingProjects.has(project.id) ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-red-600" />
+                      ) : (
+                        <Trash2 className="h-4 w-4 text-red-600" />
+                      )}
                     </ShadcnButton>
                   </div>
                 </div>

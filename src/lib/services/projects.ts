@@ -84,7 +84,7 @@ export class ProjectService {
   // Delete project
   static async deleteProject(id: string): Promise<boolean> {
     // First delete associated images from R2
-    const projectImages = await this.getProjectImages(id)
+    const projectImages = await ProjectImageService.getProjectImages(id)
     for (const image of projectImages) {
       try {
         const key = image.url.split('/').pop() // Extract key from URL
@@ -96,7 +96,10 @@ export class ProjectService {
       }
     }
 
-    // Delete project (images will be cascade deleted)
+    // Delete project images from database first
+    await db.delete(projectImages).where(eq(projectImages.projectId, id))
+
+    // Delete project
     const result = await db.delete(projects).where(eq(projects.id, id)).returning()
     return result.length > 0
   }
