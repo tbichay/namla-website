@@ -1,5 +1,5 @@
 import { eq, desc, asc } from 'drizzle-orm'
-import { db, projects, projectImages, type Project, type NewProject, type ProjectImage, type NewProjectImage } from '@/lib/db'
+import { db, projects, projectImages, projectDocuments, type Project, type NewProject, type ProjectImage, type NewProjectImage, type ProjectDocument, type NewProjectDocument } from '@/lib/db'
 import { uploadToR2, deleteFromR2, getFilePath, generateUniqueFilename } from '@/lib/r2-client'
 
 // Project CRUD operations
@@ -315,5 +315,139 @@ export function getMediaTypeFromFilename(filename: string): 'image' | 'video' {
   return videoExtensions.includes(extension) ? 'video' : 'image'
 }
 
+// Project Documents CRUD operations
+export class ProjectDocumentService {
+  // Get documents for a project
+  static async getProjectDocuments(projectId: string): Promise<ProjectDocument[]> {
+    const documents = await db
+      .select()
+      .from(projectDocuments)
+      .where(eq(projectDocuments.projectId, projectId))
+      .orderBy(asc(projectDocuments.sortOrder), asc(projectDocuments.createdAt))
+    
+    return documents
+  }
+
+  // Upload and create project document
+  static async uploadProjectDocument(
+    projectId: string,
+    file: Buffer,
+    filename: string,
+    options?: {
+      displayName?: string
+      description?: string
+      isDownloadable?: boolean
+      contentType?: string
+    }
+  ): Promise<ProjectDocument> {
+    const { displayName, description, isDownloadable = true, contentType } = options || {}
+    
+    // Generate unique filename
+    const uniqueFilename = generateUniqueFilename(filename)
+    const filePath = getFilePath('documents', uniqueFilename)
+    
+    // Upload to R2
+    const url = await uploadToR2(file, filePath, contentType)
+    
+    // Determine file type from extension
+    const fileExtension = filename.toLowerCase().split('.').pop() || ''
+    const fileType = getFileTypeFromExtension(fileExtension)
+    
+    // Create database record
+    const documentData: NewProjectDocument = {
+      projectId,
+      filename: uniqueFilename,
+      originalName: filename,
+      displayName: displayName || filename,
+      description,
+      fileType,
+      fileSize: file.length.toString(),
+      url,
+      isDownloadable,
+      createdAt: new Date()
+    }
+    
+    const result = await db.insert(projectDocuments).values(documentData).returning()
+    return result[0]
+  }
+
+  // Get project document by ID
+  static async getProjectDocumentById(id: string): Promise<ProjectDocument | null> {
+    const result = await db.select().from(projectDocuments).where(eq(projectDocuments.id, id)).limit(1)
+    return result[0] || null
+  }
+
+  // Update document metadata
+  static async updateProjectDocument(
+    id: string,
+    data: Partial<Pick<ProjectDocument, 'displayName' | 'description' | 'isDownloadable' | 'sortOrder'>>
+  ): Promise<ProjectDocument | null> {
+    const result = await db
+      .update(projectDocuments)
+      .set(data)
+      .where(eq(projectDocuments.id, id))
+      .returning()
+
+    return result[0] || null
+  }
+
+  // Delete project document
+  static async deleteProjectDocument(id: string): Promise<boolean> {
+    const document = await db.select().from(projectDocuments).where(eq(projectDocuments.id, id)).limit(1)
+    if (!document[0]) return false
+
+    try {
+      // Delete from R2
+      const key = document[0].url.split('/').pop()
+      if (key) {
+        await deleteFromR2(getFilePath('documents', key))
+      }
+    } catch (error) {
+      console.error('Error deleting document from R2:', error)
+    }
+
+    // Delete from database
+    const result = await db.delete(projectDocuments).where(eq(projectDocuments.id, id)).returning()
+    return result.length > 0
+  }
+
+  // Reorder documents
+  static async reorderDocuments(documentOrders: { id: string; sortOrder: number }[]): Promise<void> {
+    for (const { id, sortOrder } of documentOrders) {
+      await db
+        .update(projectDocuments)
+        .set({ sortOrder: sortOrder.toString() })
+        .where(eq(projectDocuments.id, id))
+    }
+  }
+
+  // Get downloadable documents for public view
+  static async getDownloadableDocuments(projectId: string): Promise<ProjectDocument[]> {
+    const documents = await db
+      .select()
+      .from(projectDocuments)
+      .where(eq(projectDocuments.projectId, projectId))
+      .where(eq(projectDocuments.isDownloadable, true))
+      .orderBy(asc(projectDocuments.sortOrder), asc(projectDocuments.createdAt))
+    
+    return documents
+  }
+}
+
+// Helper function to determine file type from extension
+export function getFileTypeFromExtension(extension: string): string {
+  const ext = extension.toLowerCase()
+  
+  // Document types
+  if (['pdf'].includes(ext)) return 'pdf'
+  if (['doc', 'docx'].includes(ext)) return 'word'
+  if (['xls', 'xlsx'].includes(ext)) return 'excel'
+  if (['ppt', 'pptx'].includes(ext)) return 'powerpoint'
+  if (['txt'].includes(ext)) return 'text'
+  if (['rtf'].includes(ext)) return 'rtf'
+  
+  return 'document' // fallback
+}
+
 // Export both services for convenience
-export { ProjectService as Projects, ProjectImageService as ProjectImages }
+export { ProjectService as Projects, ProjectImageService as ProjectImages, ProjectDocumentService as ProjectDocuments }

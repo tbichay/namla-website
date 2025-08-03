@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import MediaGallery from '@/components/MediaGallery'
 import Button from '@/components/ui/Button'
+import { FileText, Download } from 'lucide-react'
 
 interface ProjectDetailPageProps {
   params: Promise<{
@@ -43,6 +44,16 @@ interface MediaItem {
   sortOrder: number
 }
 
+interface DocumentItem {
+  id: string
+  displayName: string
+  description?: string
+  fileType: string
+  fileSize: number
+  downloadUrl: string
+  createdAt: string
+}
+
 interface ProjectData {
   id: string
   name: string
@@ -71,6 +82,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const isAdmin = session?.user?.role === 'admin'
   const comingSoonMode = process.env.NEXT_PUBLIC_COMING_SOON_MODE === 'true'
   const [project, setProject] = useState<ProjectData | null>(null)
+  const [documents, setDocuments] = useState<DocumentItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
@@ -84,15 +96,33 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   useEffect(() => {
     async function fetchProject() {
       try {
-        const response = await fetch(`/api/projects/${slug}`)
-        if (response.status === 404) {
+        // Fetch project first
+        const projectResponse = await fetch(`/api/projects/${slug}`)
+        
+        if (projectResponse.status === 404) {
           notFound()
         }
-        if (!response.ok) {
+        if (!projectResponse.ok) {
           throw new Error('Failed to fetch project')
         }
-        const data = await response.json()
-        setProject(data)
+        
+        const projectData = await projectResponse.json()
+        setProject(projectData)
+        
+        // Then fetch documents after project is confirmed to exist
+        try {
+          const documentsResponse = await fetch(`/api/projects/${slug}/documents`)
+          if (documentsResponse.ok) {
+            const documentsData = await documentsResponse.json()
+            console.log('Documents API response:', documentsData)
+            setDocuments(documentsData.documents || [])
+          } else {
+            console.error('Documents API error:', documentsResponse.status, await documentsResponse.text())
+          }
+        } catch (docErr) {
+          console.error('Documents fetch failed:', docErr)
+          // Don't fail the whole page if documents can't be loaded
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred')
       } finally {
@@ -216,6 +246,19 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               </div>
             )}
 
+            {/* Documents Section - Only show if there are downloadable documents */}
+            {console.log('Documents length:', documents.length, 'Documents:', documents)}
+            {documents.length > 0 && (
+              <div className="mt-6 sm:mt-8 px-2 sm:px-0">
+                <h2 className="text-xl sm:text-2xl font-bold text-stone-800 mb-4">Dokumente</h2>
+                <div className="grid gap-3">
+                  {documents.map((doc) => (
+                    <DocumentCard key={doc.id} document={doc} />
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Historical Project Note */}
             {isHistoricalProject(project) && (
               <div className="mt-6 sm:mt-8 px-2 sm:px-0">
@@ -314,6 +357,80 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               )}
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Document Card Component
+interface DocumentCardProps {
+  document: DocumentItem
+}
+
+function DocumentCard({ document }: DocumentCardProps) {
+  const getFileIcon = (fileType: string) => {
+    switch (fileType.toLowerCase()) {
+      case 'pdf':
+        return <FileText className="w-6 h-6 text-red-600" />
+      case 'word':
+        return <FileText className="w-6 h-6 text-blue-600" />
+      case 'excel':
+        return <FileText className="w-6 h-6 text-green-600" />
+      case 'powerpoint':
+        return <FileText className="w-6 h-6 text-orange-600" />
+      default:
+        return <FileText className="w-6 h-6 text-gray-600" />
+    }
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
+  return (
+    <div className="bg-white rounded-lg border border-stone-200 hover:border-stone-300 transition-all duration-200 p-4">
+      <div className="flex items-start justify-between">
+        <div className="flex items-start space-x-3 flex-1 min-w-0">
+          <div className="flex-shrink-0 mt-0.5">
+            {getFileIcon(document.fileType)}
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base font-medium text-stone-900 truncate">
+              {document.displayName}
+            </h3>
+            
+            {document.description && (
+              <p className="text-sm text-stone-600 mt-1 line-clamp-2">
+                {document.description}
+              </p>
+            )}
+            
+            <div className="flex items-center gap-2 mt-2 text-xs text-stone-500">
+              <span className="px-2 py-1 bg-stone-100 rounded-full">
+                {document.fileType.toUpperCase()}
+              </span>
+              <span>•</span>
+              <span>{formatFileSize(document.fileSize)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-shrink-0 ml-4">
+          <a
+            href={document.downloadUrl}
+            download
+            className="inline-flex items-center px-3 py-2 text-sm font-medium text-stone-700 bg-stone-100 border border-stone-300 rounded-lg hover:bg-stone-200 hover:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 transition-all duration-200"
+            title="Download document"
+          >
+            <Download className="w-4 h-4 mr-1.5" />
+            Download
+          </a>
         </div>
       </div>
     </div>

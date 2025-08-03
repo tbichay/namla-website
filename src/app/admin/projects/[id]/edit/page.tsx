@@ -9,9 +9,9 @@ import { ShadcnButton } from '@/components/ui/shadcn-button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select } from '@/components/ui/select'
-import { ArrowLeft, Save, Eye, Loader2, Image, Video, Sparkles, Trash2, Edit3, X, Square, CheckSquare, Layers, Wand2, GripVertical } from 'lucide-react'
+import { ArrowLeft, Save, Eye, Loader2, Image, Video, Trash2, Edit3, X, Wand2, GripVertical, FileText } from 'lucide-react'
 import MediaUpload from '@/components/admin/MediaUpload'
-import AIEnhanceModal from '@/components/admin/AIEnhanceModal'
+import DocumentUpload from '@/components/admin/DocumentUpload'
 import ImageEditorModal from '@/components/admin/ImageEditorModal'
 import VideoCompressionModal from '@/components/admin/VideoCompressionModal'
 import VideoPlayer from '@/components/ui/VideoPlayer'
@@ -65,15 +65,11 @@ export default function EditProjectPage() {
   const [fetchLoading, setFetchLoading] = useState(true)
   const [error, setError] = useState('')
   const [media, setMedia] = useState<UploadedMedia[]>([])
-  const [enhanceModalOpen, setEnhanceModalOpen] = useState(false)
-  const [selectedMediaForEnhancement, setSelectedMediaForEnhancement] = useState<UploadedMedia | null>(null)
+  const [documents, setDocuments] = useState<UploadedDocument[]>([])
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [selectedMediaForEdit, setSelectedMediaForEdit] = useState<UploadedMedia | null>(null)
-  
-  // Batch enhancement state
-  const [batchMode, setBatchMode] = useState(false)
-  const [selectedMediaIds, setSelectedMediaIds] = useState<Set<string>>(new Set())
-  const [batchEnhanceModalOpen, setBatchEnhanceModalOpen] = useState(false)
+  const [selectedDocumentForEdit, setSelectedDocumentForEdit] = useState<UploadedDocument | null>(null)
+  const [documentEditModalOpen, setDocumentEditModalOpen] = useState(false)
   
   // Drag and drop state
   const [draggedItem, setDraggedItem] = useState<UploadedMedia | null>(null)
@@ -96,6 +92,20 @@ interface UploadedMedia {
   alt?: string
   caption?: string
   isMainImage: boolean
+  sortOrder?: number
+  createdAt?: string
+}
+
+interface UploadedDocument {
+  id: string
+  url: string
+  filename: string
+  originalName: string
+  displayName: string
+  description?: string
+  fileType: string
+  fileSize: number
+  isDownloadable: boolean
   sortOrder?: number
   createdAt?: string
 }
@@ -130,6 +140,7 @@ interface UploadedMedia {
   useEffect(() => {
     fetchProject()
     fetchMedia()
+    fetchDocuments()
   }, [projectId])
 
   const fetchMedia = async () => {
@@ -141,6 +152,18 @@ interface UploadedMedia {
       }
     } catch (err) {
       console.error('Error fetching media:', err)
+    }
+  }
+
+  const fetchDocuments = async () => {
+    try {
+      const response = await fetch(`/api/admin/projects/${projectId}/documents`)
+      if (response.ok) {
+        const data = await response.json()
+        setDocuments(data.documents || [])
+      }
+    } catch (err) {
+      console.error('Error fetching documents:', err)
     }
   }
 
@@ -223,21 +246,93 @@ interface UploadedMedia {
     setMedia(prev => [...prev, ...newMedia])
   }
 
+  const handleDocumentUploadComplete = (newDocuments: UploadedDocument[]) => {
+    setDocuments(prev => [...prev, ...newDocuments])
+  }
+
+  const handleDeleteDocument = async (documentItem: UploadedDocument) => {
+    if (!confirm(`Are you sure you want to delete "${documentItem.displayName}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/admin/projects/${projectId}/documents/${documentItem.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete document')
+      }
+
+      // Remove from local state
+      setDocuments(prev => prev.filter(item => item.id !== documentItem.id))
+      toast.success('Document deleted successfully')
+    } catch (error) {
+      console.error('Error deleting document:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to delete document')
+    }
+  }
+
+  const handleEditDocument = (documentItem: UploadedDocument) => {
+    setSelectedDocumentForEdit(documentItem)
+    setDocumentEditModalOpen(true)
+  }
+
+  const handleUpdateDocument = async (updatedData: Partial<UploadedDocument>) => {
+    if (!selectedDocumentForEdit) return
+
+    try {
+      const response = await fetch(`/api/admin/projects/${projectId}/documents/${selectedDocumentForEdit.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to update document')
+      }
+
+      const result = await response.json()
+      
+      // Update local state
+      setDocuments(prev => prev.map(item => 
+        item.id === selectedDocumentForEdit.id 
+          ? { ...item, ...result.document }
+          : item
+      ))
+      
+      setDocumentEditModalOpen(false)
+      setSelectedDocumentForEdit(null)
+      toast.success('Document updated successfully')
+    } catch (error) {
+      console.error('Error updating document:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to update document')
+    }
+  }
+
   const getMediaType = (filename: string): 'image' | 'video' => {
     const extension = filename.toLowerCase().split('.').pop() || ''
     const videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v', 'flv', 'wmv']
     return videoExtensions.includes(extension) ? 'video' : 'image'
   }
 
-  const handleEnhanceMedia = (mediaItem: UploadedMedia) => {
-    const mediaType = getMediaType(mediaItem.filename)
-    if (mediaType !== 'image') {
-      toast.error('Only images can be enhanced')
-      return
+  const getDocumentIcon = (fileType: string) => {
+    switch (fileType.toLowerCase()) {
+      case 'pdf':
+        return <FileText className="w-8 h-8 text-red-600" />
+      case 'word':
+        return <FileText className="w-8 h-8 text-blue-600" />
+      case 'excel':
+        return <FileText className="w-8 h-8 text-green-600" />
+      case 'powerpoint':
+        return <FileText className="w-8 h-8 text-orange-600" />
+      default:
+        return <FileText className="w-8 h-8 text-gray-600" />
     }
-    setSelectedMediaForEnhancement(mediaItem)
-    setEnhanceModalOpen(true)
   }
+
 
   const handleDeleteMedia = async (mediaItem: UploadedMedia) => {
     if (!confirm(`Are you sure you want to delete "${mediaItem.originalName}"? This action cannot be undone.`)) {
@@ -321,47 +416,7 @@ interface UploadedMedia {
     }
   }
 
-  const handleEnhancementComplete = (result: any) => {
-    // In a real implementation, this would update the media item
-    // with the enhanced URL and refresh the media list
-    toast.success('Image enhancement completed!')
-    fetchMedia() // Refresh the media list
-  }
 
-  // Batch selection handlers
-  const toggleBatchMode = () => {
-    setBatchMode(!batchMode)
-    setSelectedMediaIds(new Set())
-  }
-
-  const toggleMediaSelection = (mediaId: string) => {
-    const newSelection = new Set(selectedMediaIds)
-    if (newSelection.has(mediaId)) {
-      newSelection.delete(mediaId)
-    } else {
-      newSelection.add(mediaId)
-    }
-    setSelectedMediaIds(newSelection)
-  }
-
-  const selectAllImages = () => {
-    const imageIds = media
-      .filter(item => getMediaType(item.filename) === 'image')
-      .map(item => item.id)
-    setSelectedMediaIds(new Set(imageIds))
-  }
-
-  const clearSelection = () => {
-    setSelectedMediaIds(new Set())
-  }
-
-  const handleBatchEnhancement = () => {
-    if (selectedMediaIds.size === 0) {
-      toast.error('Please select at least one image')
-      return
-    }
-    setBatchEnhanceModalOpen(true)
-  }
 
   // Drag and drop handlers
   const handleDragStart = (e: React.DragEvent, item: UploadedMedia, index: number) => {
@@ -922,7 +977,7 @@ interface UploadedMedia {
                       <h4 className="text-sm font-medium text-gray-700">
                         Vorhandene Medien ({media.length})
                       </h4>
-                      {!batchMode && media.length > 1 && (
+                      {media.length > 1 && (
                         <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                           <GripVertical className="w-3 h-3 inline mr-1" />
                           Drag to reorder
@@ -930,101 +985,26 @@ interface UploadedMedia {
                       )}
                     </div>
                     
-                    {/* Batch Mode Toggle */}
-                    <div className="flex items-center gap-2">
-                      <ShadcnButton
-                        onClick={toggleBatchMode}
-                        variant={batchMode ? "default" : "outline"}
-                        size="sm"
-                        className="text-xs"
-                      >
-                        <Layers className="w-3 h-3 mr-1" />
-                        {batchMode ? 'Exit Batch Mode' : 'Batch Mode'}
-                      </ShadcnButton>
-                    </div>
                   </div>
-
-                  {/* Batch Action Toolbar */}
-                  {batchMode && (
-                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm text-blue-700 font-medium">
-                            {selectedMediaIds.size} selected
-                          </span>
-                          
-                          <div className="flex gap-2">
-                            <ShadcnButton
-                              onClick={selectAllImages}
-                              variant="outline"
-                              size="sm"
-                              className="text-xs"
-                            >
-                              Select All Images
-                            </ShadcnButton>
-                            
-                            <ShadcnButton
-                              onClick={clearSelection}
-                              variant="outline"
-                              size="sm"
-                              className="text-xs"
-                            >
-                              Clear Selection
-                            </ShadcnButton>
-                          </div>
-                        </div>
-                        
-                        {selectedMediaIds.size > 0 && (
-                          <ShadcnButton
-                            onClick={handleBatchEnhancement}
-                            className="text-xs bg-purple-600 hover:bg-purple-700"
-                            size="sm"
-                          >
-                            <Wand2 className="w-3 h-3 mr-1" />
-                            Apply Style to Selected ({selectedMediaIds.size})
-                          </ShadcnButton>
-                        )}
-                      </div>
-                    </div>
-                  )}
                   
                   <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
                     {media.map((item, index) => (
                       <div 
                         key={item.id} 
                         className="relative group"
-                        draggable={!batchMode}
+                        draggable={true}
                         onDragStart={(e) => handleDragStart(e, item, index)}
                         onDragEnd={handleDragEnd}
                         onDragOver={(e) => handleDragOver(e, index)}
                         onDragLeave={handleDragLeave}
                         onDrop={(e) => handleDrop(e, index)}
                       >
-                        {/* Drag Handle - Only visible when not in batch mode */}
-                        {!batchMode && (
-                          <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <div className="bg-black/50 rounded p-1 cursor-grab active:cursor-grabbing">
-                              <GripVertical className="w-4 h-4 text-white" />
-                            </div>
+                        {/* Drag Handle */}
+                        <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <div className="bg-black/50 rounded p-1 cursor-grab active:cursor-grabbing">
+                            <GripVertical className="w-4 h-4 text-white" />
                           </div>
-                        )}
-                        
-                        {/* Batch Selection Checkbox */}
-                        {batchMode && getMediaType(item.filename) === 'image' && (
-                          <div 
-                            className="absolute top-2 left-2 z-20 cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              toggleMediaSelection(item.id)
-                            }}
-                          >
-                            {selectedMediaIds.has(item.id) ? (
-                              <CheckSquare className="w-5 h-5 text-blue-600 bg-white rounded shadow-sm" />
-                            ) : (
-                              <Square className="w-5 h-5 text-gray-400 bg-white rounded shadow-sm" />
-                            )}
-                          </div>
-                        )}
+                        </div>
                         
                         {/* Drop indicator */}
                         {dragOverIndex === index && draggedItem && draggedItem.id !== item.id && (
@@ -1033,8 +1013,8 @@ interface UploadedMedia {
                         
                         <div 
                           className={`aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden transition-all duration-200 ${
-                            batchMode && selectedMediaIds.has(item.id) ? 'ring-2 ring-blue-500' : ''
-                          } ${draggedItem?.id === item.id ? 'opacity-50 scale-95' : ''}`}
+                            draggedItem?.id === item.id ? 'opacity-50 scale-95' : ''
+                          }`}
                         >
                           {getMediaType(item.filename) === 'image' ? (
                             <img
@@ -1052,9 +1032,8 @@ interface UploadedMedia {
                             />
                           )}
                           
-                          {/* Action Buttons - Hidden in batch mode */}
-                          {!batchMode && (
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors duration-200 flex items-center justify-center gap-2">
+                          {/* Action Buttons */}
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors duration-200 flex items-center justify-center gap-2">
                             {/* Edit Button */}
                             <button
                               onClick={() => handleEditMedia(item)}
@@ -1064,16 +1043,6 @@ interface UploadedMedia {
                               <Edit3 className="w-4 h-4" />
                             </button>
                             
-                            {/* Enhancement Button - Only for images */}
-                            {getMediaType(item.filename) === 'image' && (
-                              <button
-                                onClick={() => handleEnhanceMedia(item)}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full shadow-lg"
-                                title="Enhance with AI"
-                              >
-                                <Sparkles className="w-4 h-4" />
-                              </button>
-                            )}
                             
                             {/* Image Editor Button - Only for images */}
                             {getMediaType(item.filename) === 'image' && (
@@ -1106,7 +1075,6 @@ interface UploadedMedia {
                               <Trash2 className="w-4 h-4" />
                             </button>
                             </div>
-                          )}
                         </div>
                         
                         {/* Status Badges */}
@@ -1134,6 +1102,89 @@ interface UploadedMedia {
                 onUploadComplete={handleMediaUploadComplete}
                 existingMedia={media}
                 maxFiles={20}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Documents Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Dokumente
+                {documents.length > 0 && (
+                  <span className="text-sm font-normal text-gray-500">({documents.length})</span>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Existing Documents */}
+              {documents.length > 0 && (
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-gray-700">Hochgeladene Dokumente</h4>
+                  <div className="grid gap-4">
+                    {documents.map((doc) => (
+                      <div key={doc.id} className="flex items-start p-4 bg-gray-50 rounded-lg border">
+                        <div className="flex-shrink-0 mr-3">
+                          {getDocumentIcon(doc.fileType)}
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h5 className="text-sm font-medium text-gray-900 truncate">
+                                {doc.displayName}
+                              </h5>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {doc.originalName} • {(doc.fileSize / 1024 / 1024).toFixed(2)} MB
+                              </p>
+                              {doc.description && (
+                                <p className="text-xs text-gray-600 mt-1">{doc.description}</p>
+                              )}
+                              <div className="flex items-center gap-2 mt-2">
+                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                  doc.isDownloadable 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {doc.isDownloadable ? 'Downloadbar' : 'Privat'}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {doc.fileType.toUpperCase()}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-1 ml-4">
+                              <button
+                                onClick={() => handleEditDocument(doc)}
+                                className="p-2 text-gray-400 hover:text-blue-600 rounded-lg transition-colors"
+                                title="Edit document"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteDocument(doc)}
+                                className="p-2 text-gray-400 hover:text-red-600 rounded-lg transition-colors"
+                                title="Delete document"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Upload Component */}
+              <DocumentUpload
+                projectId={projectId}
+                onUploadComplete={handleDocumentUploadComplete}
+                existingDocuments={documents}
+                maxFiles={10}
               />
             </CardContent>
           </Card>
@@ -1178,35 +1229,6 @@ interface UploadedMedia {
         </div>
       </div>
 
-      {/* AI Enhancement Modal */}
-      <AIEnhanceModal
-        isOpen={enhanceModalOpen}
-        onClose={() => setEnhanceModalOpen(false)}
-        projectId={projectId}
-        mediaId={selectedMediaForEnhancement?.id || ''}
-        mediaUrl={selectedMediaForEnhancement?.url || ''}
-        onEnhancementComplete={handleEnhancementComplete}
-      />
-
-      {/* Batch Enhancement Modal */}
-      <AIEnhanceModal
-        isOpen={batchEnhanceModalOpen}
-        onClose={() => setBatchEnhanceModalOpen(false)}
-        projectId={projectId}
-        mediaId=""
-        mediaUrl=""
-        onEnhancementComplete={(result) => {
-          // Apply enhancement to all selected images
-          toast.success(`Style applied to ${selectedMediaIds.size} images!`)
-          fetchMedia()
-          setBatchMode(false)
-          setSelectedMediaIds(new Set())
-          setBatchEnhanceModalOpen(false)
-        }}
-        batchMode={true}
-        selectedMediaIds={Array.from(selectedMediaIds)}
-        selectedMedia={media.filter(item => selectedMediaIds.has(item.id))}
-      />
 
       {/* Metadata Edit Modal */}
       {editModalOpen && selectedMediaForEdit && (
@@ -1260,6 +1282,19 @@ interface UploadedMedia {
           onCompressionComplete={() => {
             fetchMedia() // Refresh media list after compression
           }}
+        />
+      )}
+
+      {/* Document Edit Modal */}
+      {documentEditModalOpen && selectedDocumentForEdit && (
+        <DocumentEditModal
+          isOpen={documentEditModalOpen}
+          onClose={() => {
+            setDocumentEditModalOpen(false)
+            setSelectedDocumentForEdit(null)
+          }}
+          document={selectedDocumentForEdit}
+          onSave={handleUpdateDocument}
         />
       )}
     </div>
@@ -1382,6 +1417,144 @@ function MetadataEditModal({ media, onClose, onSave, getMediaType }: MetadataEdi
             <p className="text-xs text-gray-500">
               Main image is used as the project thumbnail
             </p>
+
+            {/* Actions */}
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <ShadcnButton
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={saving}
+              >
+                Cancel
+              </ShadcnButton>
+              <ShadcnButton
+                type="submit"
+                disabled={saving}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </ShadcnButton>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Document Edit Modal Component
+interface DocumentEditModalProps {
+  isOpen: boolean
+  onClose: () => void
+  document: UploadedDocument
+  onSave: (updates: Partial<UploadedDocument>) => void
+}
+
+function DocumentEditModal({ isOpen, onClose, document, onSave }: DocumentEditModalProps) {
+  const [formData, setFormData] = useState({
+    displayName: document.displayName,
+    description: document.description || '',
+    isDownloadable: document.isDownloadable
+  })
+  const [saving, setSaving] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
+    
+    try {
+      await onSave(formData)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Edit Document
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Display Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Display Name
+              </label>
+              <Input
+                value={formData.displayName}
+                onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
+                placeholder="e.g., Baubeschreibung"
+                className="w-full"
+                required
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Description
+              </label>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Additional information about this document"
+                rows={3}
+                className="w-full"
+              />
+            </div>
+
+            {/* Downloadable Toggle */}
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="isDownloadable"
+                checked={formData.isDownloadable}
+                onChange={(e) => setFormData(prev => ({ ...prev, isDownloadable: e.target.checked }))}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="isDownloadable" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Make downloadable
+              </label>
+            </div>
+            <p className="text-xs text-gray-500">
+              Downloadable documents are shown in the public project view
+            </p>
+
+            {/* File Info */}
+            <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                <strong>Original:</strong> {document.originalName}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                <strong>Size:</strong> {(document.fileSize / 1024 / 1024).toFixed(2)} MB
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                <strong>Type:</strong> {document.fileType.toUpperCase()}
+              </p>
+            </div>
 
             {/* Actions */}
             <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">

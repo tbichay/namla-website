@@ -105,3 +105,22 @@ export const projectImages = pgTable('project_images', {
 
 export type ProjectImage = typeof projectImages.$inferSelect
 export type NewProjectImage = typeof projectImages.$inferInsert
+
+// Project documents table for PDFs, Word docs, etc.
+export const projectDocuments = pgTable('project_documents', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  projectId: uuid('project_id').references(() => projects.id, { onDelete: 'cascade' }).notNull(),
+  filename: varchar('filename', { length: 255 }).notNull(),
+  originalName: varchar('original_name', { length: 255 }).notNull(),
+  displayName: varchar('display_name', { length: 255 }).notNull(),
+  description: text('description'),
+  fileType: varchar('file_type', { length: 20 }).notNull(),
+  fileSize: decimal('file_size', { precision: 10, scale: 0 }).notNull(), // File size in bytes
+  url: varchar('url', { length: 1000 }).notNull(),
+  isDownloadable: boolean('is_downloadable').default(true),
+  sortOrder: decimal('sort_order', { precision: 5, scale: 2 }).default('0'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export type ProjectDocument = typeof projectDocuments.$inferSelect
+export type NewProjectDocument = typeof projectDocuments.$inferInsert

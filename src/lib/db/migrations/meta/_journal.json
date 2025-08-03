@@ -15,6 +15,13 @@
       "when": 1754141845928,
       "tag": "0001_cultured_moonstone",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754248524491,
+      "tag": "0002_unknown_colonel_america",
+      "breakpoints": true
     }
   ]
 }
