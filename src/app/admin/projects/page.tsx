@@ -231,27 +231,27 @@ export default function ProjectsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-stone-900">Projekte</h1>
-          <p className="text-stone-600 mt-2">
+      {/* Header - Mobile Optimized */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-stone-900">Projekte</h1>
+          <p className="text-stone-600 mt-1 sm:mt-2">
             Verwalten Sie Ihre Immobilienprojekte
           </p>
         </div>
-        <Link href="/admin/projects/new">
-          <ShadcnButton>
+        <Link href="/admin/projects/new" className="self-start sm:self-auto">
+          <ShadcnButton className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
-            Neues Projekt
+            <span className="sm:inline">Neues Projekt</span>
           </ShadcnButton>
         </Link>
       </div>
 
-      {/* Filters */}
+      {/* Filters - Mobile Optimized */}
       <Card>
-        <CardContent className="p-6">
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="relative">
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="relative sm:col-span-2 lg:col-span-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-stone-400" />
               <Input
                 placeholder="Suchen..."
@@ -263,6 +263,7 @@ export default function ProjectsPage() {
             <Select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full"
             >
               <option value="">Alle Status</option>
               <option value="verfügbar">Verfügbar</option>
@@ -274,14 +275,19 @@ export default function ProjectsPage() {
             <Select
               value={publishedFilter}
               onChange={(e) => setPublishedFilter(e.target.value)}
+              className="w-full"
             >
               <option value="">Alle Projekte</option>
               <option value="true">Veröffentlicht</option>
               <option value="false">Entwürfe</option>
             </Select>
-            <ShadcnButton variant="outline" onClick={fetchProjects}>
+            <ShadcnButton 
+              variant="outline" 
+              onClick={fetchProjects}
+              className="w-full sm:w-auto"
+            >
               <Filter className="mr-2 h-4 w-4" />
-              Aktualisieren
+              <span className="sm:inline">Aktualisieren</span>
             </ShadcnButton>
           </div>
         </CardContent>
@@ -315,88 +321,107 @@ export default function ProjectsPage() {
         ) : (
           filteredProjects.map((project) => (
             <Card key={project.id}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-stone-900 truncate">
+              <CardContent className="p-4 sm:p-6">
+                {/* Mobile-First Layout */}
+                <div className="space-y-3">
+                  {/* Header with Title and Status */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base sm:text-lg font-semibold text-stone-900 break-words leading-tight">
                         {project.name}
                       </h3>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
                       {getStatusBadge(project.status)}
                       {!project.isPublished && (
-                        <Badge variant="outline">Entwurf</Badge>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-4 text-sm text-stone-600 mb-3">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" />
-                        {project.location}
-                      </div>
-                      {project.priceFrom && (
-                        <div className="flex items-center gap-1">
-                          <Euro className="h-4 w-4" />
-                          {project.priceFrom === '---' ? 'Verkauft' : `ab ${project.priceFrom}`}
-                        </div>
-                      )}
-                      <div className="text-xs">
-                        {project.type}
-                      </div>
-                    </div>
-
-                    {project.shortDescription && (
-                      <p className="text-sm text-stone-600 line-clamp-2 mb-3">
-                        {project.shortDescription}
-                      </p>
-                    )}
-
-                    <div className="text-xs text-stone-500">
-                      Erstellt: {new Date(project.createdAt).toLocaleDateString('de-DE')}
-                      {project.updatedAt !== project.createdAt && (
-                        <>
-                          {' • '}
-                          Aktualisiert: {new Date(project.updatedAt).toLocaleDateString('de-DE')}
-                        </>
+                        <Badge variant="outline" className="text-xs">Entwurf</Badge>
                       )}
                     </div>
                   </div>
+                  
+                  {/* Location, Price, and Type - Mobile Stacked */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-stone-600">
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <MapPin className="h-4 w-4 flex-shrink-0" />
+                      <span className="break-words">{project.location}</span>
+                    </div>
+                    {project.priceFrom && (
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <Euro className="h-4 w-4 flex-shrink-0" />
+                        <span className="break-words">
+                          {project.priceFrom === '---' ? 'Verkauft' : `ab ${project.priceFrom}`}
+                        </span>
+                      </div>
+                    )}
+                    <div className="text-xs bg-stone-100 px-2 py-1 rounded-full self-start">
+                      {project.type}
+                    </div>
+                  </div>
 
-                  <div className="flex items-center gap-2 ml-4">
-                    <ShadcnButton
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => toggleProjectStatus(project.id)}
-                      title={project.isPublished ? 'Verstecken' : 'Veröffentlichen'}
-                      disabled={togglingProjects.has(project.id)}
-                    >
-                      {togglingProjects.has(project.id) ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : project.isPublished ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
+                  {/* Description */}
+                  {project.shortDescription && (
+                    <p className="text-sm text-stone-600 line-clamp-2 break-words">
+                      {project.shortDescription}
+                    </p>
+                  )}
+
+                  {/* Bottom Row: Dates and Actions */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t border-stone-100">
+                    <div className="text-xs text-stone-500 break-words">
+                      Erstellt: {new Date(project.createdAt).toLocaleDateString('de-DE')}
+                      {project.updatedAt !== project.createdAt && (
+                        <span className="block sm:inline">
+                          <span className="hidden sm:inline"> • </span>
+                          Aktualisiert: {new Date(project.updatedAt).toLocaleDateString('de-DE')}
+                        </span>
                       )}
-                    </ShadcnButton>
-                    
-                    <Link href={`/admin/projects/${project.id}/edit`}>
-                      <ShadcnButton variant="ghost" size="icon" title="Bearbeiten">
-                        <Edit className="h-4 w-4" />
+                    </div>
+
+                    {/* Action Buttons - Mobile Optimized */}
+                    <div className="flex items-center gap-1 justify-end">
+                      <ShadcnButton
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleProjectStatus(project.id)}
+                        title={project.isPublished ? 'Verstecken' : 'Veröffentlichen'}
+                        disabled={togglingProjects.has(project.id)}
+                        className="h-8 w-8 p-0 sm:h-9 sm:w-9"
+                      >
+                        {togglingProjects.has(project.id) ? (
+                          <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                        ) : project.isPublished ? (
+                          <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" />
+                        ) : (
+                          <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                        )}
                       </ShadcnButton>
-                    </Link>
-                    
-                    <ShadcnButton
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => openDeleteModal(project.id, project.name)}
-                      title="Löschen"
-                      disabled={deletingProjects.has(project.id)}
-                    >
-                      {deletingProjects.has(project.id) ? (
-                        <Loader2 className="h-4 w-4 animate-spin text-red-600" />
-                      ) : (
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      )}
-                    </ShadcnButton>
+                      
+                      <Link href={`/admin/projects/${project.id}/edit`}>
+                        <ShadcnButton 
+                          variant="ghost" 
+                          size="sm" 
+                          title="Bearbeiten"
+                          className="h-8 w-8 p-0 sm:h-9 sm:w-9"
+                        >
+                          <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                        </ShadcnButton>
+                      </Link>
+                      
+                      <ShadcnButton
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openDeleteModal(project.id, project.name)}
+                        title="Löschen"
+                        disabled={deletingProjects.has(project.id)}
+                        className="h-8 w-8 p-0 sm:h-9 sm:w-9"
+                      >
+                        {deletingProjects.has(project.id) ? (
+                          <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-red-600" />
+                        ) : (
+                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
+                        )}
+                      </ShadcnButton>
+                    </div>
                   </div>
                 </div>
               </CardContent>
