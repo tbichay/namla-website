@@ -31,10 +31,31 @@ export default function ProjectsPage() {
   const [publishedFilter, setPublishedFilter] = useState('')
   const [togglingProjects, setTogglingProjects] = useState<Set<string>>(new Set())
   const [deletingProjects, setDeletingProjects] = useState<Set<string>>(new Set())
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    projectId: string | null
+    projectName: string | null
+  }>({
+    isOpen: false,
+    projectId: null,
+    projectName: null
+  })
 
   useEffect(() => {
     fetchProjects()
   }, [statusFilter, publishedFilter])
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && deleteModal.isOpen) {
+        closeDeleteModal()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [deleteModal.isOpen])
 
   const fetchProjects = async () => {
     try {
@@ -117,10 +138,30 @@ export default function ProjectsPage() {
     }
   }
 
-  const deleteProject = async (projectId: string, projectName: string) => {
-    if (!confirm(`Sind Sie sicher, dass Sie das Projekt "${projectName}" permanent löschen möchten?\n\nDiese Aktion kann nicht rückgängig gemacht werden.`)) {
-      return
-    }
+  const openDeleteModal = (projectId: string, projectName: string) => {
+    setDeleteModal({
+      isOpen: true,
+      projectId,
+      projectName
+    })
+  }
+
+  const closeDeleteModal = () => {
+    setDeleteModal({
+      isOpen: false,
+      projectId: null,
+      projectName: null
+    })
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteModal.projectId || !deleteModal.projectName) return
+    
+    const projectId = deleteModal.projectId
+    const projectName = deleteModal.projectName
+    
+    // Close modal first
+    closeDeleteModal()
 
     // Add to deleting set
     setDeletingProjects(prev => new Set(prev).add(projectId))
@@ -346,7 +387,7 @@ export default function ProjectsPage() {
                     <ShadcnButton
                       variant="ghost"
                       size="icon"
-                      onClick={() => deleteProject(project.id, project.name)}
+                      onClick={() => openDeleteModal(project.id, project.name)}
                       title="Löschen"
                       disabled={deletingProjects.has(project.id)}
                     >
@@ -368,6 +409,56 @@ export default function ProjectsPage() {
       {filteredProjects.length > 0 && (
         <div className="text-center text-sm text-stone-500">
           {filteredProjects.length} von {projects.length} Projekten angezeigt
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={closeDeleteModal}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                  <Trash2 className="h-6 w-6 text-red-600" />
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <h3 className="text-lg font-medium text-stone-900 mb-2">
+                  Projekt löschen
+                </h3>
+                <p className="text-sm text-stone-600 mb-6">
+                  Sind Sie sicher, dass Sie das Projekt{' '}
+                  <span className="font-semibold">"{deleteModal.projectName}"</span>{' '}
+                  permanent löschen möchten?
+                </p>
+                <p className="text-xs text-red-600 mb-6">
+                  Diese Aktion kann nicht rückgängig gemacht werden.
+                </p>
+              </div>
+              
+              <div className="flex gap-3 justify-end">
+                <ShadcnButton
+                  variant="outline"
+                  onClick={closeDeleteModal}
+                >
+                  Abbrechen
+                </ShadcnButton>
+                <ShadcnButton
+                  variant="destructive"
+                  onClick={confirmDelete}
+                >
+                  Löschen
+                </ShadcnButton>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
