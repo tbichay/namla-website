@@ -33,6 +33,8 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  // Sharp configuration for Vercel
+  serverExternalPackages: ['sharp'],
 };
 
 export default nextConfig;
