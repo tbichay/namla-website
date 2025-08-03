@@ -161,14 +161,38 @@ async function runDatabaseMigrations() {
 async function deployWithEnvironmentVariables(branchEnvVars, vercelToken) {
   console.log('🚀 Deploying to Vercel with branch-specific environment variables...')
   
-  // Build the vercel deploy command with all environment variables
-  const buildEnvFlags = Object.entries(branchEnvVars)
+  // Categorize environment variables
+  const buildTimeVars = {}
+  const runtimeVars = {}
+  
+  Object.entries(branchEnvVars).forEach(([key, value]) => {
+    // Build-time variables (used during build process)
+    if (key.startsWith('NEXT_PUBLIC_')) {
+      buildTimeVars[key] = value
+    } else {
+      // Runtime variables (used when app runs)
+      runtimeVars[key] = value
+    }
+  })
+  
+  // Build command flags
+  const buildEnvFlags = Object.entries(buildTimeVars)
     .map(([key, value]) => `--build-env ${key}="${value}"`)
     .join(' ')
     
-  const deployCommand = `vercel deploy ${buildEnvFlags}${vercelToken ? ` --token ${vercelToken}` : ''} --yes`
+  const runtimeEnvFlags = Object.entries(runtimeVars)
+    .map(([key, value]) => `--env ${key}="${value}"`)
+    .join(' ')
+    
+  const deployCommand = `vercel deploy ${buildEnvFlags} ${runtimeEnvFlags}${vercelToken ? ` --token ${vercelToken}` : ''} --yes`
   
-  console.log(`📦 Deploying with ${Object.keys(branchEnvVars).length} environment variables`)
+  console.log(`📦 Deploying with ${Object.keys(buildTimeVars).length} build-time and ${Object.keys(runtimeVars).length} runtime environment variables`)
+  
+  // Log database URL (masked for security)
+  if (runtimeVars.DATABASE_URL) {
+    const maskedDbUrl = runtimeVars.DATABASE_URL.replace(/:[^:@]+@/, ':***@')
+    console.log(`🗄️  Database URL: ${maskedDbUrl}`)
+  }
   
   try {
     const output = execSync(deployCommand, { 
