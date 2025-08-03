@@ -1,22 +1,40 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #fafaf9; /* stone-50 */
-  --foreground: #1c1917; /* stone-900 */
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --background: 50 10% 97%; /* stone-50 */
+  --foreground: 25 5% 11%; /* stone-900 */
+  --card: 0 0% 100%;
+  --card-foreground: 25 5% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 25 5% 11%;
+  --primary: 25 5% 11%;
+  --primary-foreground: 50 10% 97%;
+  --secondary: 20 6% 90%;
+  --secondary-foreground: 25 5% 11%;
+  --muted: 20 6% 90%;
+  --muted-foreground: 25 5% 45%;
+  --accent: 20 6% 90%;
+  --accent-foreground: 25 5% 11%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 50 10% 97%;
+  --border: 20 6% 83%;
+  --input: 20 6% 83%;
+  --ring: 25 5% 11%;
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+  --radius: 0.5rem;
 }
 
 /* Always use light theme to match the design */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #fafaf9; /* stone-50 - keep light theme */
-    --foreground: #1c1917; /* stone-900 */
+    --background: 50 10% 97%; /* stone-50 - keep light theme */
+    --foreground: 25 5% 11%; /* stone-900 */
   }
 }
 
