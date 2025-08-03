@@ -27,12 +27,13 @@ export const r2Client = new S3Client({
 
 // Get storage prefix based on current branch
 export const getStoragePrefix = (): string => {
-  // Priority: GitHub head ref > GitHub ref name > Vercel git ref > local branch env > fallback to main
+  // Priority: GitHub head ref > GitHub ref name > local branch env > Vercel git ref > fallback to main
+  // Note: BRANCH_NAME is prioritized over VERCEL_GIT_COMMIT_REF because it's managed by our branch setup
   const branch = 
     process.env.GITHUB_HEAD_REF || 
     process.env.GITHUB_REF_NAME?.replace('refs/heads/', '') ||
-    process.env.VERCEL_GIT_COMMIT_REF ||
     process.env.BRANCH_NAME ||
+    process.env.VERCEL_GIT_COMMIT_REF ||
     'main'
   
   const prefix = branch === 'main' ? 'main' : `branch-${branch}`
