@@ -10,7 +10,7 @@ interface BaseProject {
 // Current projects with full details
 export interface CurrentProject extends BaseProject {
   category: 'current'
-  status: 'verfügbar' | 'verkauft'
+  status: 'verfügbar' | 'verkauft' | 'in_planung' | 'in_bau' | 'fertiggestellt'
   description: string
   priceFrom: string
   details: {

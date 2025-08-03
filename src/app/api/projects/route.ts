@@ -28,8 +28,14 @@ export async function GET(request: NextRequest) {
     )
 
     // Separate projects based on status
-    const currentProjects = projectsWithImages.filter(project => project.status !== 'verkauft')
-    const historicalProjects = projectsWithImages.filter(project => project.status === 'verkauft')
+    // Current: in_planung, verfügbar, in_bau
+    // Historical: verkauft, fertiggestellt
+    const currentProjects = projectsWithImages.filter(project => 
+      ['in_planung', 'verfügbar', 'in_bau'].includes(project.status)
+    )
+    const historicalProjects = projectsWithImages.filter(project => 
+      ['verkauft', 'fertiggestellt'].includes(project.status)
+    )
 
     // Return filtered results based on category parameter
     if (category === 'current') {

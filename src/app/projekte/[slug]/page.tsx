@@ -114,10 +114,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           const documentsResponse = await fetch(`/api/projects/${slug}/documents`)
           if (documentsResponse.ok) {
             const documentsData = await documentsResponse.json()
-            console.log('Documents API response:', documentsData)
             setDocuments(documentsData.documents || [])
-          } else {
-            console.error('Documents API error:', documentsResponse.status, await documentsResponse.text())
           }
         } catch (docErr) {
           console.error('Documents fetch failed:', docErr)
@@ -247,7 +244,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             )}
 
             {/* Documents Section - Only show if there are downloadable documents */}
-            {console.log('Documents length:', documents.length, 'Documents:', documents)}
             {documents.length > 0 && (
               <div className="mt-6 sm:mt-8 px-2 sm:px-0">
                 <h2 className="text-xl sm:text-2xl font-bold text-stone-800 mb-4">Dokumente</h2>

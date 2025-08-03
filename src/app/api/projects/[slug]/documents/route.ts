@@ -10,7 +10,6 @@ interface RouteContext {
 export async function GET(request: NextRequest, { params }: RouteContext) {
   try {
     const { slug } = await params
-    console.log('Documents API called with slug:', slug)
     
     // Try to get project by slug first, then by ID if slug lookup fails
     let project = await ProjectService.getProjectBySlug(slug)
@@ -20,7 +19,6 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
       project = await ProjectService.getProjectById(slug)
     }
     
-    console.log('Project found:', project ? 'Yes' : 'No', project ? project.id : 'N/A')
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }

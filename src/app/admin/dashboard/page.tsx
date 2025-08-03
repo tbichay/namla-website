@@ -84,10 +84,10 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Stats Grid - Mobile Optimized */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
-          <Card key={card.title}>
+          <Card key={card.title} className="touch-manipulation">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 {card.title}
@@ -104,8 +104,8 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid gap-6 md:grid-cols-2">
+      {/* Quick Actions - Mobile Optimized */}
+      <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Schnellaktionen</CardTitle>
@@ -116,14 +116,14 @@ export default function AdminDashboard() {
           <CardContent className="space-y-3">
             <a
               href="/admin/projects/new"
-              className="block p-3 rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors"
+              className="block p-4 rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors touch-manipulation min-h-[60px] flex flex-col justify-center"
             >
               <div className="font-medium text-stone-900">Neues Projekt erstellen</div>
               <div className="text-sm text-stone-600">Fügen Sie ein neues Immobilienprojekt hinzu</div>
             </a>
             <a
               href="/admin/projects"
-              className="block p-3 rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors"
+              className="block p-4 rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors touch-manipulation min-h-[60px] flex flex-col justify-center"
             >
               <div className="font-medium text-stone-900">Projekte verwalten</div>
               <div className="text-sm text-stone-600">Bearbeiten Sie bestehende Projekte</div>
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
             <a
               href="/"
               target="_blank"
-              className="block p-3 rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors"
+              className="block p-4 rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors touch-manipulation min-h-[60px] flex flex-col justify-center"
             >
               <div className="font-medium text-stone-900">Website ansehen</div>
               <div className="text-sm text-stone-600">Besuchen Sie die öffentliche Website</div>

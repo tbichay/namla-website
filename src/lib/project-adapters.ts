@@ -10,7 +10,7 @@ export function dbProjectToCurrentProject(dbProject: DbProject): CurrentProject 
     year: dbProject.details?.buildYear || new Date(dbProject.createdAt).getFullYear(),
     images: Array.isArray(dbProject.images) ? dbProject.images : [],
     category: 'current' as const,
-    status: dbProject.status === 'verkauft' ? 'verkauft' : 'verfügbar',
+    status: dbProject.status, // Keep the original status
     description: dbProject.description || '',
     priceFrom: dbProject.priceFrom || 'Preis auf Anfrage',
     details: {
@@ -46,12 +46,14 @@ export function dbProjectToHistoricalProject(dbProject: DbProject): HistoricalPr
 
 // Convert array of database projects to frontend format
 export function adaptProjectsForPublic(dbProjects: DbProject[]) {
+  // Current: in_planung, verfügbar, in_bau
   const currentProjects = dbProjects
-    .filter(p => p.status !== 'verkauft')
+    .filter(p => ['in_planung', 'verfügbar', 'in_bau'].includes(p.status))
     .map(dbProjectToCurrentProject)
     
+  // Historical: verkauft, fertiggestellt
   const historicalProjects = dbProjects  
-    .filter(p => p.status === 'verkauft')
+    .filter(p => ['verkauft', 'fertiggestellt'].includes(p.status))
     .map(dbProjectToHistoricalProject)
     .sort((a, b) => b.year - a.year) // Sort from newest to oldest
 

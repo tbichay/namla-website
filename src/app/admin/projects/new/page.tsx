@@ -118,8 +118,8 @@ export default function NewProjectPage() {
     try {
       const payload = {
         ...formData,
-        isPublished: publish,
-        publishedAt: publish ? new Date() : null
+        isPublished: publish
+        // Let the backend handle publishedAt automatically
       }
 
       const response = await fetch('/api/admin/projects', {

@@ -30,7 +30,15 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             className={`self-start px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium whitespace-nowrap rounded-full ${
               project.status === 'verfügbar'
                 ? 'bg-green-100 text-green-800'
-                : 'bg-stone-100 text-stone-600'
+                : project.status === 'verkauft'
+                ? 'bg-gray-100 text-gray-600'
+                : project.status === 'in_planung'
+                ? 'bg-yellow-100 text-yellow-800'
+                : project.status === 'in_bau'
+                ? 'bg-blue-100 text-blue-800'
+                : project.status === 'fertiggestellt'
+                ? 'bg-purple-100 text-purple-800'
+                : 'bg-stone-100 text-stone-600' // fallback
             }`}
           >
             {project.status}

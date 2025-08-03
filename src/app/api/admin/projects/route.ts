@@ -60,10 +60,20 @@ export async function POST(request: NextRequest) {
     // Generate slug if not provided
     const slug = body.slug || await Projects.generateSlug(name)
 
+    // Handle publishedAt - convert string to Date if needed
+    let publishedAt = body.publishedAt
+    if (publishedAt && typeof publishedAt === 'string') {
+      publishedAt = new Date(publishedAt)
+    } else if (body.isPublished && !publishedAt) {
+      // If publishing but no publishedAt provided, set to now
+      publishedAt = new Date()
+    }
+
     // Create project
     const projectData = {
       ...body,
       slug,
+      publishedAt,
       images: body.images || [],
       features: body.features || [],
       details: body.details || {},
