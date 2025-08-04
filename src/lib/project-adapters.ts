@@ -26,13 +26,33 @@ export function dbProjectToCurrentProject(dbProject: DbProject): CurrentProject 
 
 // Convert database project to frontend HistoricalProject
 export function dbProjectToHistoricalProject(dbProject: DbProject): HistoricalProject {
-  // Extract unit count from details or description, fallback to 1
-  let units = 1
-  if (dbProject.details?.rooms) {
-    const roomMatch = dbProject.details.rooms.match(/(\d+)/)
-    units = roomMatch ? parseInt(roomMatch[1]) : 1
+  // Extract unit count from details - look for proper unit data
+  let units = 0
+  
+  // Check if there's a specific units field in details
+  if (dbProject.details?.units && typeof dbProject.details.units === 'number') {
+    units = dbProject.details.units
+  } 
+  // Otherwise try to infer from project type and data
+  else if (dbProject.type === 'mehrfamilienhaus') {
+    // For apartment buildings, try to extract from description or default based on size
+    if (dbProject.description) {
+      const unitMatch = dbProject.description.match(/(\d+)\s*(?:wohnung|einheit|apartment)/i)
+      if (unitMatch) {
+        units = parseInt(unitMatch[1])
+      }
+    }
+    // Default reasonable number for apartment buildings if no data
+    if (units === 0) units = 4
+  } 
+  else if (dbProject.type === 'einfamilienhaus') {
+    units = 1
   }
-
+  else if (dbProject.type === 'doppelhaus') {
+    units = 2
+  }
+  // For other types, only show if we have explicit data
+  
   return {
     id: dbProject.id,
     name: dbProject.name,

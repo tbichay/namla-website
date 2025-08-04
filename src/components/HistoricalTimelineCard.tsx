@@ -151,12 +151,14 @@ export default function HistoricalTimelineCard({
           {/* Location */}
           <p className="text-xs text-stone-500 mb-2">{project.location}</p>
           
-          {/* Unit Count */}
-          <div className="flex justify-center">
-            <span className="text-xs bg-stone-100 text-stone-600 px-2 py-1 rounded">
-              {project.units} EH
-            </span>
-          </div>
+          {/* Unit Count - only show if we have meaningful data */}
+          {project.units && project.units > 0 && (
+            <div className="flex justify-center">
+              <span className="text-xs bg-stone-100 text-stone-600 px-2 py-1 rounded">
+                {project.units} {project.units === 1 ? 'Einheit' : 'Einheiten'}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

@@ -33,7 +33,7 @@ export default function LightboxGallery({
     }
   }, [isOpen, initialIndex, validImages.length])
 
-  // Handle keyboard navigation
+  // Handle keyboard navigation and body scroll lock
   useEffect(() => {
     if (!isOpen) return
 
@@ -53,14 +53,26 @@ export default function LightboxGallery({
       }
     }
 
+    // Store original overflow style
+    const originalOverflow = document.body.style.overflow
+    
     document.addEventListener('keydown', handleKeyDown)
     document.body.style.overflow = 'hidden' // Prevent background scroll
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = 'unset'
+      // Always restore original overflow style
+      document.body.style.overflow = originalOverflow || 'unset'
     }
   }, [isOpen, validImages.length, onClose])
+
+  // Additional cleanup effect for body scroll - safety net
+  useEffect(() => {
+    if (!isOpen) {
+      // Ensure body scroll is restored when lightbox closes
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
 
   const nextImage = () => {
     setCurrentIndex((prev) => (prev + 1) % validImages.length)

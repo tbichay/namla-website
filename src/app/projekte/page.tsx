@@ -7,6 +7,7 @@ import ProjectCard from '@/components/ProjectCard'
 import HistoricalTimelineCard from '@/components/HistoricalTimelineCard'
 import { CurrentProject, HistoricalProject } from '@/types/project'
 import { adaptProjectsForPublic } from '@/lib/project-adapters'
+import { calculateProjectMetrics, formatMetricWithPlus, formatMetric } from '@/lib/project-metrics'
 import type { Project as DbProject } from '@/lib/db'
 
 export default function ProjectsPage() {
@@ -142,14 +143,16 @@ export default function ProjectsPage() {
 
           {/* Timeline Container */}
           <div className="relative">
-            {/* Timeline Navigation */}
-            <div className="flex justify-center items-center mb-8 text-sm text-stone-500">
-              <span>2024</span>
-              <div className="flex-1 mx-4 h-px bg-stone-200 relative">
-                <div className="absolute left-0 w-8 h-px bg-amber-600"></div>
+            {/* Timeline Navigation - Dynamic years based on real data */}
+            {historicalProjects.length > 0 && (
+              <div className="flex justify-center items-center mb-8 text-sm text-stone-500">
+                <span>{Math.max(...historicalProjects.map(p => p.year))}</span>
+                <div className="flex-1 mx-4 h-px bg-stone-200 relative">
+                  <div className="absolute left-0 w-8 h-px bg-amber-600"></div>
+                </div>
+                <span>{Math.min(...historicalProjects.map(p => p.year))}</span>
               </div>
-              <span>1998</span>
-            </div>
+            )}
 
             {/* Scrollable Timeline */}
             <div className="relative">
@@ -200,21 +203,26 @@ export default function ProjectsPage() {
               </button>
             </div>
 
-            {/* Timeline Stats */}
-            <div className="flex justify-center items-center mt-8 space-x-8 text-center">
-              <div>
-                <div className="text-2xl font-bold text-stone-800">{historicalProjects.length}</div>
-                <div className="text-sm text-stone-600">Erfolgreich realisiert</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-stone-800">26+</div>
-                <div className="text-sm text-stone-600">Jahre Erfahrung</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-stone-800">150+</div>
-                <div className="text-sm text-stone-600">Wohneinheiten</div>
-              </div>
-            </div>
+            {/* Timeline Stats - Using real data */}
+            {(() => {
+              const metrics = calculateProjectMetrics(historicalProjects, currentProjects)
+              return (
+                <div className="flex justify-center items-center mt-8 space-x-8 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-stone-800">{formatMetric(metrics.completedProjectsCount)}</div>
+                    <div className="text-sm text-stone-600">Erfolgreich realisiert</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-stone-800">{formatMetricWithPlus(metrics.yearsExperience)}</div>
+                    <div className="text-sm text-stone-600">Jahre Erfahrung</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-stone-800">{formatMetricWithPlus(metrics.totalUnits)}</div>
+                    <div className="text-sm text-stone-600">Wohneinheiten</div>
+                  </div>
+                </div>
+              )
+            })()}
           </div>
         </div>
       </section>
