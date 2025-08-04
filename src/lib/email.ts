@@ -36,15 +36,29 @@ export async function sendContactEmail(data: ContactEmailData) {
     ? `Projektanfrage: ${projectName} - ${name}`
     : `Neue Kontaktanfrage von ${name}`
 
-  const emailHtml = render(
-    ContactEmail({
+  let emailHtml: string
+  try {
+    const emailElement = ContactEmail({
       name,
       email,
       message,
       projectName,
       isProjectInquiry
     })
-  )
+    
+    emailHtml = await render(emailElement)
+    
+    // Debug logging
+    console.log('Email render result type:', typeof emailHtml)
+    console.log('Email render result preview:', emailHtml.substring(0, 100))
+    
+    if (typeof emailHtml !== 'string') {
+      throw new Error(`Expected string from render(), got ${typeof emailHtml}`)
+    }
+  } catch (error) {
+    console.error('Email rendering error:', error)
+    throw new Error('Failed to render email template')
+  }
 
   // Send email to NAMLA
   const namlaEmailResult = await resend.emails.send({
@@ -58,14 +72,18 @@ export async function sendContactEmail(data: ContactEmailData) {
   // If this is a project inquiry, also send confirmation email to the interested person
   if (isProjectInquiry && projectName) {
     try {
-      const confirmationHtml = render(
-        ProjectInterestConfirmationEmail({
-          name,
-          projectName,
-          projectLocation,
-          projectStatus
-        })
-      )
+      const confirmationElement = ProjectInterestConfirmationEmail({
+        name,
+        projectName,
+        projectLocation,
+        projectStatus
+      })
+      
+      const confirmationHtml = await render(confirmationElement)
+      
+      if (typeof confirmationHtml !== 'string') {
+        throw new Error(`Expected string from render(), got ${typeof confirmationHtml}`)
+      }
 
       await resend.emails.send({
         from: 'NAMLA <info@namla.de>',
@@ -90,12 +108,16 @@ export async function sendNewsletterConfirmationEmail(data: NewsletterEmailData)
 
   const confirmationUrl = `${getBaseUrl()}/api/newsletter/confirm?token=${data.confirmationToken}`
   
-  const emailHtml = render(
-    NewsletterConfirmationEmail({
-      name: data.name,
-      confirmationUrl
-    })
-  )
+  const emailElement = NewsletterConfirmationEmail({
+    name: data.name,
+    confirmationUrl
+  })
+  
+  const emailHtml = await render(emailElement)
+  
+  if (typeof emailHtml !== 'string') {
+    throw new Error(`Expected string from render(), got ${typeof emailHtml}`)
+  }
 
   return await resend.emails.send({
     from: 'NAMLA Newsletter <newsletter@namla.de>',
@@ -113,12 +135,16 @@ export async function sendNewsletterWelcomeEmail(data: NewsletterEmailData) {
 
   const unsubscribeUrl = `${getBaseUrl()}/api/newsletter/unsubscribe?token=${data.unsubscribeToken}`
   
-  const emailHtml = render(
-    NewsletterWelcomeEmail({
-      name: data.name,
-      unsubscribeUrl
-    })
-  )
+  const emailElement = NewsletterWelcomeEmail({
+    name: data.name,
+    unsubscribeUrl
+  })
+  
+  const emailHtml = await render(emailElement)
+  
+  if (typeof emailHtml !== 'string') {
+    throw new Error(`Expected string from render(), got ${typeof emailHtml}`)
+  }
 
   return await resend.emails.send({
     from: 'NAMLA Newsletter <newsletter@namla.de>',

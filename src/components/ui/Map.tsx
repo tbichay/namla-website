@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface MapProps {
   className?: string
@@ -23,36 +23,45 @@ export default function Map({
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
   const isInitializingRef = useRef(false)
+  const [mapKey] = useState(() => Math.random().toString(36).substring(7))
 
   useEffect(() => {
     if (typeof window === 'undefined' || !mapRef.current || isInitializingRef.current) return
     
-    // Check if map is already initialized and clean it up
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove()
-      mapInstanceRef.current = null
-    }
-
     // Dynamically import Leaflet to avoid SSR issues
     const initMap = async () => {
+      if (isInitializingRef.current) return
       isInitializingRef.current = true
-      const L = (await import('leaflet')).default
+      
+      try {
+        const L = (await import('leaflet')).default
 
-      // Fix for default markers in Next.js
-      delete (L.Icon.Default.prototype as any)._getIconUrl
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-      })
+        // Check if map is already initialized and clean it up
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.remove()
+          mapInstanceRef.current = null
+        }
 
-      // Ensure the container is clean before creating new map
-      if (mapRef.current) {
+        // Ensure the container exists and is clean
+        if (!mapRef.current) {
+          isInitializingRef.current = false
+          return
+        }
+
+        // Clear any existing map data
         mapRef.current.innerHTML = ''
-      }
+        mapRef.current._leaflet_id = null
 
-      // Create map
-      const map = L.map(mapRef.current!).setView([coordinates.lat, coordinates.lng], zoom)
+        // Fix for default markers in Next.js
+        delete (L.Icon.Default.prototype as any)._getIconUrl
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        })
+
+        // Create map
+        const map = L.map(mapRef.current).setView([coordinates.lat, coordinates.lng], zoom)
 
       // Add OpenStreetMap tile layer
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -104,32 +113,44 @@ export default function Map({
         }).addTo(map)
       }
 
-      mapInstanceRef.current = map
-      isInitializingRef.current = false
+        mapInstanceRef.current = map
 
-      // Disable scroll zoom initially
-      map.scrollWheelZoom.disable()
-      
-      // Enable scroll zoom on click
-      map.on('click', () => {
-        map.scrollWheelZoom.enable()
-      })
-      
-      // Disable scroll zoom when mouse leaves
-      map.on('mouseout', () => {
+        // Disable scroll zoom initially
         map.scrollWheelZoom.disable()
-      })
+        
+        // Enable scroll zoom on click
+        map.on('click', () => {
+          map.scrollWheelZoom.enable()
+        })
+        
+        // Disable scroll zoom when mouse leaves
+        map.on('mouseout', () => {
+          map.scrollWheelZoom.disable()
+        })
+      } catch (error) {
+        console.error('Failed to initialize map:', error)
+      } finally {
+        isInitializingRef.current = false
+      }
     }
 
     initMap()
 
-    // Cleanup
+    // Cleanup function
     return () => {
+      isInitializingRef.current = false
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove()
+        try {
+          mapInstanceRef.current.remove()
+        } catch (error) {
+          console.warn('Error cleaning up map:', error)
+        }
         mapInstanceRef.current = null
       }
-      isInitializingRef.current = false
+      if (mapRef.current) {
+        mapRef.current.innerHTML = ''
+        mapRef.current._leaflet_id = null
+      }
     }
   }, [coordinates.lat, coordinates.lng, zoom])
 
@@ -146,7 +167,7 @@ export default function Map({
       <div className={`relative ${className}`}>
         <div 
           ref={mapRef} 
-          key={`map-${coordinates.lat}-${coordinates.lng}-${zoom}`}
+          key={`map-${mapKey}`}
           style={{ height }}
           className="w-full rounded-lg shadow-sm border border-stone-200 relative z-0"
         />
