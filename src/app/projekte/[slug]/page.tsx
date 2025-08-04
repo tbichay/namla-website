@@ -10,64 +10,11 @@ import Button from '@/components/ui/Button'
 import ProjectInterestForm from '@/components/ProjectInterestForm'
 import { getStatusLabel, formatPrice, shouldShowPrice } from '@/lib/project-display-utils'
 import { FileText, Download } from 'lucide-react'
-import { Metadata } from 'next'
 
 interface ProjectDetailPageProps {
   params: Promise<{
     slug: string
   }>
-}
-
-// Generate metadata for the page
-export async function generateMetadata({ params }: ProjectDetailPageProps): Promise<Metadata> {
-  const { slug } = await params
-  
-  try {
-    // Fetch the project data for metadata
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/projects/${slug}`)
-    
-    if (!response.ok) {
-      return {
-        title: 'Projekt nicht gefunden | NAMLA',
-        description: 'Das angeforderte Projekt konnte nicht gefunden werden.'
-      }
-    }
-    
-    const project = await response.json()
-    
-    // Generate meta description
-    let metaDescription = ''
-    if (project.metaDescription) {
-      metaDescription = project.metaDescription
-    } else if (project.shortDescription) {
-      metaDescription = project.shortDescription.length > 160 
-        ? project.shortDescription.substring(0, 157) + '...'
-        : project.shortDescription
-    } else if (project.description) {
-      metaDescription = project.description.length > 160
-        ? project.description.substring(0, 157) + '...'
-        : project.description
-    } else {
-      metaDescription = `${project.name} in ${project.location} | NAMLA`
-    }
-    
-    return {
-      title: `${project.name} - ${project.location} | NAMLA`,
-      description: metaDescription,
-      openGraph: {
-        title: `${project.name} - ${project.location}`,
-        description: metaDescription,
-        images: project.media && project.media.length > 0 
-          ? [{ url: project.media[0].url, alt: project.name }]
-          : []
-      }
-    }
-  } catch (error) {
-    return {
-      title: 'Projekt | NAMLA',
-      description: 'Projekt Details von NAMLA'
-    }
-  }
 }
 
 interface ProjectDetails {
@@ -164,6 +111,36 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
         
         const projectData = await projectResponse.json()
         setProject(projectData)
+        
+        // Update document title and meta description
+        const title = `${projectData.name} - ${projectData.location} | NAMLA`
+        let metaDescription = ''
+        
+        if (projectData.metaDescription) {
+          metaDescription = projectData.metaDescription
+        } else if (projectData.shortDescription) {
+          metaDescription = projectData.shortDescription.length > 160 
+            ? projectData.shortDescription.substring(0, 157) + '...'
+            : projectData.shortDescription
+        } else if (projectData.description) {
+          metaDescription = projectData.description.length > 160
+            ? projectData.description.substring(0, 157) + '...'
+            : projectData.description
+        } else {
+          metaDescription = `${projectData.name} in ${projectData.location} | NAMLA`
+        }
+        
+        // Update document head
+        document.title = title
+        
+        // Update meta description
+        let descriptionMeta = document.querySelector('meta[name="description"]') as HTMLMetaElement
+        if (!descriptionMeta) {
+          descriptionMeta = document.createElement('meta')
+          descriptionMeta.name = 'description'
+          document.head.appendChild(descriptionMeta)
+        }
+        descriptionMeta.content = metaDescription
         
         // Then fetch documents after project is confirmed to exist
         try {
