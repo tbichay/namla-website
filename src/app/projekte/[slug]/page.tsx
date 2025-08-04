@@ -285,6 +285,22 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                   <span className="font-medium text-stone-800 capitalize">{project.type.replace('_', ' ')}</span>
                 </div>
 
+                {/* Location */}
+                {project.location && (
+                  <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500">Ort</span>
+                    <span className="font-medium text-stone-800">{project.location}</span>
+                  </div>
+                )}
+
+                {/* Address */}
+                {project.address && (
+                  <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500">Adresse</span>
+                    <span className="font-medium text-stone-800">{project.address}</span>
+                  </div>
+                )}
+
                 {/* Living Space */}
                 {project.details?.livingSpace && (
                   <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
@@ -293,11 +309,83 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                   </div>
                 )}
 
+                {/* Total Space */}
+                {project.details?.totalSpace && (
+                  <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500">Gesamtfläche</span>
+                    <span className="font-medium text-stone-800">{project.details.totalSpace}</span>
+                  </div>
+                )}
+
                 {/* Rooms */}
                 {project.details?.rooms && (
                   <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
                     <span className="text-stone-500">Zimmer</span>
                     <span className="font-medium text-stone-800">{project.details.rooms}</span>
+                  </div>
+                )}
+
+                {/* Bedrooms */}
+                {project.details?.bedrooms && (
+                  <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500">Schlafzimmer</span>
+                    <span className="font-medium text-stone-800">{project.details.bedrooms}</span>
+                  </div>
+                )}
+
+                {/* Bathrooms */}
+                {project.details?.bathrooms && (
+                  <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500">Badezimmer</span>
+                    <span className="font-medium text-stone-800">{project.details.bathrooms}</span>
+                  </div>
+                )}
+
+                {/* Floors */}
+                {project.details?.floors && (
+                  <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500">Etagen</span>
+                    <span className="font-medium text-stone-800">{project.details.floors}</span>
+                  </div>
+                )}
+
+                {/* Plot Size */}
+                {project.details?.plotSize && (
+                  <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500">Grundstück</span>
+                    <span className="font-medium text-stone-800">{project.details.plotSize}</span>
+                  </div>
+                )}
+
+                {/* Build Year */}
+                {project.details?.buildYear && (
+                  <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500">Baujahr</span>
+                    <span className="font-medium text-stone-800">{project.details.buildYear}</span>
+                  </div>
+                )}
+
+                {/* Energy Class */}
+                {project.details?.energyClass && (
+                  <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500">Energieklasse</span>
+                    <span className="font-medium text-stone-800">{project.details.energyClass}</span>
+                  </div>
+                )}
+
+                {/* Heating Type */}
+                {project.details?.heatingType && (
+                  <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500">Heizung</span>
+                    <span className="font-medium text-stone-800">{project.details.heatingType}</span>
+                  </div>
+                )}
+
+                {/* Parking */}
+                {project.details?.parking && (
+                  <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500">Parkplätze</span>
+                    <span className="font-medium text-stone-800">{project.details.parking}</span>
                   </div>
                 )}
 
@@ -311,19 +399,49 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                   </div>
                 )}
 
-                {/* Plot Size */}
-                {project.details?.plotSize && (
-                  <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
-                    <span className="text-stone-500">Grundstück</span>
-                    <span className="font-medium text-stone-800">{project.details.plotSize}</span>
+                {/* Features Section */}
+                {(project.details?.balcony || project.details?.terrace || project.details?.garden || project.details?.basement || project.details?.elevator) && (
+                  <div className="py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500 mb-2 block">Ausstattung</span>
+                    <div className="flex flex-wrap gap-2">
+                      {project.details.balcony && (
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Balkon</span>
+                      )}
+                      {project.details.terrace && (
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Terrasse</span>
+                      )}
+                      {project.details.garden && (
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Garten</span>
+                      )}
+                      {project.details.basement && (
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Keller</span>
+                      )}
+                      {project.details.elevator && (
+                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">Fahrstuhl</span>
+                      )}
+                    </div>
                   </div>
                 )}
 
-                {/* Energy Class */}
-                {project.details?.energyClass && (
-                  <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
-                    <span className="text-stone-500">Energieklasse</span>
-                    <span className="font-medium text-stone-800">{project.details.energyClass}</span>
+                {/* Additional Features */}
+                {project.features && project.features.length > 0 && (
+                  <div className="py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500 mb-2 block">Besonderheiten</span>
+                    <div className="space-y-1">
+                      {project.features.map((feature, index) => (
+                        <div key={index} className="text-stone-800 text-sm">• {feature}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Description */}
+                {project.description && (
+                  <div className="py-2 border-b border-stone-200 text-sm sm:text-base">
+                    <span className="text-stone-500 mb-2 block">Beschreibung</span>
+                    <p className="text-stone-800 text-sm leading-relaxed whitespace-pre-line">
+                      {project.description}
+                    </p>
                   </div>
                 )}
 
