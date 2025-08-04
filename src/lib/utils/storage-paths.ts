@@ -3,7 +3,7 @@
 
 import { getStoragePrefix } from '@/lib/r2-client'
 
-export type StorageContext = 'original' | 'edited' | 'ai-enhanced' | 'versions' | 'reference' | 'temp'
+export type StorageContext = 'original' | 'edited' | 'ai-enhanced' | 'documents' | 'versions' | 'reference' | 'temp'
 
 interface ProjectPathOptions {
   projectId: string
@@ -107,6 +107,7 @@ export const migrateLegacyPath = (legacyPath: string, projectId: string): string
   // Map legacy folders to new contexts
   const contextMap: Record<string, StorageContext> = {
     'projects': 'original',
+    'documents': 'documents',
     'edited': 'edited', 
     'enhanced': 'ai-enhanced'
   }
@@ -133,6 +134,9 @@ export const StoragePaths = {
     
   projectVersion: (projectId: string, version: string, filename: string) => 
     getProjectStoragePath({ projectId, context: 'versions', version, filename }),
+    
+  projectDocument: (projectId: string, filename: string) => 
+    getProjectStoragePath({ projectId, context: 'documents', filename }),
   
   // Global paths
   referenceImage: (filename: string) => 

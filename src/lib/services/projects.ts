@@ -1,6 +1,7 @@
 import { eq, desc, asc } from 'drizzle-orm'
 import { db, projects, projectImages, projectDocuments, type Project, type NewProject, type ProjectImage, type NewProjectImage, type ProjectDocument, type NewProjectDocument } from '@/lib/db'
 import { uploadToR2, deleteFromR2, getFilePath, generateUniqueFilename } from '@/lib/r2-client'
+import { StoragePaths } from '@/lib/utils/storage-paths'
 
 // Project CRUD operations
 export class ProjectService {
@@ -87,9 +88,11 @@ export class ProjectService {
     const projectImagesList = await ProjectImageService.getProjectImages(id)
     for (const image of projectImagesList) {
       try {
-        const key = image.url.split('/').pop() // Extract key from URL
-        if (key) {
-          await deleteFromR2(getFilePath('projects', key))
+        // Extract full storage key from URL (everything after domain)
+        const url = new URL(image.url)
+        const storageKey = url.pathname.substring(1) // Remove leading slash
+        if (storageKey) {
+          await deleteFromR2(storageKey)
         }
       } catch (error) {
         console.error('Error deleting image from R2:', error)
@@ -171,7 +174,7 @@ export class ProjectImageService {
     
     // Generate unique filename
     const uniqueFilename = generateUniqueFilename(filename)
-    const filePath = getFilePath('projects', uniqueFilename)
+    const filePath = StoragePaths.projectOriginal(projectId, uniqueFilename)
     
     // Upload to R2
     const url = await uploadToR2(file, filePath, contentType)
@@ -283,10 +286,11 @@ export class ProjectImageService {
     if (!image[0]) return false
 
     try {
-      // Delete from R2
-      const key = image[0].url.split('/').pop()
-      if (key) {
-        await deleteFromR2(getFilePath('projects', key))
+      // Delete from R2 - extract full storage key from URL
+      const url = new URL(image[0].url)
+      const storageKey = url.pathname.substring(1) // Remove leading slash
+      if (storageKey) {
+        await deleteFromR2(storageKey)
       }
     } catch (error) {
       console.error('Error deleting image from R2:', error)
@@ -344,7 +348,7 @@ export class ProjectDocumentService {
     
     // Generate unique filename
     const uniqueFilename = generateUniqueFilename(filename)
-    const filePath = getFilePath('documents', uniqueFilename)
+    const filePath = StoragePaths.projectDocument(projectId, uniqueFilename)
     
     // Upload to R2
     const url = await uploadToR2(file, filePath, contentType)
@@ -397,10 +401,11 @@ export class ProjectDocumentService {
     if (!document[0]) return false
 
     try {
-      // Delete from R2
-      const key = document[0].url.split('/').pop()
-      if (key) {
-        await deleteFromR2(getFilePath('documents', key))
+      // Delete from R2 - extract full storage key from URL
+      const url = new URL(document[0].url)
+      const storageKey = url.pathname.substring(1) // Remove leading slash
+      if (storageKey) {
+        await deleteFromR2(storageKey)
       }
     } catch (error) {
       console.error('Error deleting document from R2:', error)
