@@ -164,15 +164,14 @@ export async function sendNewsletterWelcomeEmail(data: NewsletterEmailData) {
 
 // Helper function to get base URL for email links
 function getBaseUrl(): string {
-  // TEMPORARY: Use the current working Vercel URL until namla.de domain is configured
-  // This ensures newsletter confirmation links work
-  if (process.env.NODE_ENV === 'production') {
-    return 'https://namla-website-n1nqz9q5l-tom-bichays-projects.vercel.app'
-  }
-  
-  // Use VERCEL_URL for preview/development
+  // Always use VERCEL_URL in production (it changes with each deployment)
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`
+  }
+  
+  // Fallback to NEXT_PUBLIC_SITE_URL
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL
   }
   
   // Development fallback
