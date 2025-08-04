@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import MediaGallery from '@/components/MediaGallery'
 import Button from '@/components/ui/Button'
+import ProjectInterestForm from '@/components/ProjectInterestForm'
 import { FileText, Download } from 'lucide-react'
 
 interface ProjectDetailPageProps {
@@ -85,6 +86,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const [documents, setDocuments] = useState<DocumentItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showInterestForm, setShowInterestForm] = useState(false)
   
   // Redirect public users to coming soon page
   useEffect(() => {
@@ -336,9 +338,19 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
               {/* Contact Button for Current Projects */}
               {isCurrentProject(project) && (
-                <div className="mt-6 sm:mt-8">
-                  <Button href="/kontakt" className="w-full text-center">
-                    Jetzt anfragen
+                <div className="mt-6 sm:mt-8 space-y-4">
+                  <Button 
+                    onClick={() => setShowInterestForm(true)}
+                    className="w-full text-center"
+                  >
+                    Interesse bekunden
+                  </Button>
+                  <Button 
+                    href="/kontakt"
+                    variant="secondary"
+                    className="w-full text-center"
+                  >
+                    Allgemeine Anfrage
                   </Button>
                 </div>
               )}
@@ -355,6 +367,21 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Project Interest Form Modal */}
+      {showInterestForm && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <ProjectInterestForm
+              projectName={project.name}
+              projectLocation={project.location}
+              projectStatus={project.status}
+              isOpen={showInterestForm}
+              onClose={() => setShowInterestForm(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

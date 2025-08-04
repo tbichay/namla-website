@@ -165,6 +165,30 @@ export default function DatenschutzPage() {
                   Wenn Sie uns per Kontaktformular Anfragen zukommen lassen, werden Ihre Angaben aus dem Anfrageformular inklusive der von Ihnen dort angegebenen Kontaktdaten zwecks Bearbeitung der Anfrage und für den Fall von Anschlussfragen bei uns gespeichert.
                 </p>
               </div>
+
+              <div>
+                <h3 className="font-semibold text-stone-800 mb-2">Newsletter</h3>
+                <div className="space-y-3">
+                  <p className="text-sm leading-relaxed">
+                    Wenn Sie den auf der Website angebotenen Newsletter beziehen möchten, benötigen wir von Ihnen eine E-Mail-Adresse sowie Informationen, welche uns die Überprüfung gestatten, dass Sie der Inhaber der angegebenen E-Mail-Adresse sind und mit dem Empfang des Newsletters einverstanden sind.
+                  </p>
+                  <p className="text-sm leading-relaxed">
+                    <strong>Verarbeitete Daten:</strong> E-Mail-Adresse, Name (optional), IP-Adresse (zur Protokollierung), Zeitstempel der Anmeldung und Bestätigung
+                  </p>
+                  <p className="text-sm leading-relaxed">
+                    <strong>Rechtsgrundlage:</strong> Die Verarbeitung der in das Newsletter-Anmeldeformular eingetragenen Daten erfolgt auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO).
+                  </p>
+                  <p className="text-sm leading-relaxed">
+                    <strong>Double-Opt-In-Verfahren:</strong> Die Newsletter-Anmeldung erfolgt in einem sogenannten Double-Opt-In-Verfahren. Das heißt, Sie erhalten nach der Anmeldung eine E-Mail, in der Sie um die Bestätigung Ihrer Anmeldung gebeten werden.
+                  </p>
+                  <p className="text-sm leading-relaxed">
+                    <strong>Widerruf:</strong> Die erteilte Einwilligung zur Speicherung der Daten, der E-Mail-Adresse sowie deren Nutzung zum Versand des Newsletters können Sie jederzeit widerrufen, etwa über den "Abmelden"-Link im Newsletter oder durch eine E-Mail an info@namla.de.
+                  </p>
+                  <p className="text-sm leading-relaxed">
+                    <strong>Speicherdauer:</strong> Die Daten werden gelöscht, sobald sie für die Erreichung des Zweckes ihrer Erhebung nicht mehr erforderlich sind. Die E-Mail-Adresse wird dementsprechend solange gespeichert, wie das Abonnement des Newsletters aktiv ist.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
