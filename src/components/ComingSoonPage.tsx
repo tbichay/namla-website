@@ -7,6 +7,8 @@ import { toast } from 'react-hot-toast'
 
 export default function ComingSoonPage() {
   const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
+  const [consent, setConsent] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [adminEmail, setAdminEmail] = useState('')
@@ -15,13 +17,38 @@ export default function ComingSoonPage() {
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!consent) {
+      toast.error('Bitte stimmen Sie der Datenschutzerklärung zu.')
+      return
+    }
+    
     setIsSubmitting(true)
 
     try {
-      // TODO: Implement newsletter signup API
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
-      toast.success('Vielen Dank! Sie werden über den Launch informiert.')
-      setEmail('')
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          name: name || undefined,
+          consent: true,
+          source: 'coming_soon'
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(data.message || 'Bestätigungs-E-Mail wurde gesendet!')
+        setEmail('')
+        setName('')
+        setConsent(false)
+      } else {
+        toast.error(data.error || 'Fehler beim Anmelden')
+      }
     } catch (error) {
       toast.error('Fehler beim Anmelden. Versuchen Sie es später erneut.')
     } finally {
@@ -91,21 +118,49 @@ export default function ComingSoonPage() {
             neue Immobilienprojekte verfügbar werden.
           </p>
           
-          <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Ihre E-Mail-Adresse"
-              required
-              className="flex-1 px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent"
-            />
+          <form onSubmit={handleNewsletterSubmit} className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ihr Name (optional)"
+                className="flex-1 px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent"
+              />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Ihre E-Mail-Adresse"
+                required
+                className="flex-1 px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent"
+              />
+            </div>
+            
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="newsletter-consent"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+                required
+                className="mt-1 w-4 h-4 text-amber-600 bg-stone-100 border-stone-300 rounded focus:ring-amber-500 focus:ring-2"
+              />
+              <label htmlFor="newsletter-consent" className="text-sm text-stone-600 leading-relaxed">
+                Ich stimme zu, dass meine E-Mail-Adresse für den Newsletter-Versand gespeichert wird. 
+                Die Einwilligung kann jederzeit widerrufen werden. Weitere Informationen finden Sie in unserer{' '}
+                <a href="/datenschutz" className="text-amber-600 hover:text-amber-700 underline">
+                  Datenschutzerklärung
+                </a>.
+              </label>
+            </div>
+            
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitting || !consent}
+              className="w-full px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Anmelden...' : 'Benachrichtigen'}
+              {isSubmitting ? 'Anmelden...' : 'Newsletter abonnieren'}
             </button>
           </form>
         </div>

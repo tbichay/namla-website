@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import nodemailer from 'nodemailer'
+import { sendContactEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, message, turnstileToken } = await request.json()
+    const { name, email, message, turnstileToken, projectName } = await request.json()
 
     // Validate required fields
     if (!name || !email || !message || !turnstileToken) {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        secret: '0x4AAAAAABnP_WjEnIl9ghtvUIh0gUgGCSo',
+        secret: process.env.TURNSTILE_SECRET_KEY!,
         response: turnstileToken,
       }),
     })
@@ -34,35 +34,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create email transporter (you'll need to configure this with your email service)
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
+    // Send email using Resend
+    await sendContactEmail({
+      name,
+      email,
+      message,
+      projectName,
+      isProjectInquiry: !!projectName
     })
-
-    // Email content
-    const mailOptions = {
-      from: process.env.SMTP_USER,
-      to: 'info@namla.de',
-      subject: `Neue Kontaktanfrage von ${name}`,
-      html: `
-        <h2>Neue Kontaktanfrage</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>E-Mail:</strong> ${email}</p>
-        <p><strong>Nachricht:</strong></p>
-        <p>${message.replace(/\n/g, '<br>')}</p>
-        <hr>
-        <p><small>Gesendet über das Kontaktformular der NAMLA Website</small></p>
-      `,
-    }
-
-    // Send email
-    await transporter.sendMail(mailOptions)
 
     return NextResponse.json(
       { message: 'Nachricht erfolgreich gesendet' },

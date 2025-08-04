@@ -124,3 +124,24 @@ export const projectDocuments = pgTable('project_documents', {
 
 export type ProjectDocument = typeof projectDocuments.$inferSelect
 export type NewProjectDocument = typeof projectDocuments.$inferInsert
+
+// Newsletter subscribers table
+export const newsletterSubscribers = pgTable('newsletter_subscribers', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  name: varchar('name', { length: 255 }),
+  status: varchar('status', { length: 20 }).notNull().default('pending'), // pending, confirmed, unsubscribed
+  confirmationToken: varchar('confirmation_token', { length: 64 }).unique(),
+  unsubscribeToken: varchar('unsubscribe_token', { length: 64 }).unique(),
+  interests: text('interests'), // JSON array of interests
+  source: varchar('source', { length: 50 }).default('coming_soon'), // coming_soon, project_page, contact
+  ipAddress: varchar('ip_address', { length: 45 }),
+  userAgent: text('user_agent'),
+  confirmedAt: timestamp('confirmed_at'),
+  unsubscribedAt: timestamp('unsubscribed_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect
+export type NewNewsletterSubscriber = typeof newsletterSubscribers.$inferInsert
