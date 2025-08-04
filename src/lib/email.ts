@@ -162,16 +162,17 @@ export async function sendNewsletterWelcomeEmail(data: NewsletterEmailData) {
   })
 }
 
-// Helper function to get base URL
+// Helper function to get base URL for email links
 function getBaseUrl(): string {
-  // Priority 1: In Vercel deployment, use VERCEL_URL with https (most reliable)
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`
+  // TEMPORARY: Use the current working Vercel URL until namla.de domain is configured
+  // This ensures newsletter confirmation links work
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://namla-website-n1nqz9q5l-tom-bichays-projects.vercel.app'
   }
   
-  // Priority 2: Use NEXT_PUBLIC_SITE_URL if available (custom domain)
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL
+  // Use VERCEL_URL for preview/development
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
   }
   
   // Development fallback
