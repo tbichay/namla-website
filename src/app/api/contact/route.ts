@@ -3,7 +3,7 @@ import { sendContactEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, message, turnstileToken, projectName } = await request.json()
+    const { name, email, message, turnstileToken, projectName, projectLocation, projectStatus } = await request.json()
 
     // Validate required fields
     if (!name || !email || !message) {
@@ -13,48 +13,57 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Skip Turnstile verification for project interest forms (better UX)
-    // For general contact forms, Turnstile is still required
-    if (turnstileToken && turnstileToken !== 'project-interest') {
-      // Verify Cloudflare Turnstile token
-      const turnstileResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          secret: process.env.TURNSTILE_SECRET_KEY!,
-          response: turnstileToken,
-        }),
-      })
+    // Handle CAPTCHA verification
+    const isProjectInterest = turnstileToken === 'project-interest'
+    const shouldSkipCaptcha = isProjectInterest && projectName
 
-      const turnstileResult = await turnstileResponse.json()
+    if (!shouldSkipCaptcha && turnstileToken) {
+      // Verify Cloudflare Turnstile token for general contact forms
+      try {
+        const turnstileResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            secret: process.env.TURNSTILE_SECRET_KEY!,
+            response: turnstileToken,
+          }),
+        })
 
-      if (!turnstileResult.success) {
+        const turnstileResult = await turnstileResponse.json()
+
+        if (!turnstileResult.success) {
+          return NextResponse.json(
+            { error: 'CAPTCHA-Verifizierung fehlgeschlagen' },
+            { status: 400 }
+          )
+        }
+      } catch (error) {
+        console.error('Turnstile verification error:', error)
         return NextResponse.json(
           { error: 'CAPTCHA-Verifizierung fehlgeschlagen' },
           { status: 400 }
         )
       }
-    } else if (!turnstileToken || turnstileToken === 'project-interest') {
-      // For project interest, we skip CAPTCHA but add additional validation
-      if (!projectName) {
-        // If no project name and no turnstile token, require turnstile
-        if (!turnstileToken) {
-          return NextResponse.json(
-            { error: 'CAPTCHA-Verifizierung erforderlich' },
-            { status: 400 }
-          )
-        }
-      }
+    } else if (!shouldSkipCaptcha && !turnstileToken) {
+      // Require CAPTCHA for non-project inquiries
+      return NextResponse.json(
+        { error: 'CAPTCHA-Verifizierung erforderlich' },
+        { status: 400 }
+      )
     }
 
     // Send email using Resend
+    console.log('Sending contact email:', { name, email, projectName, isProjectInquiry: !!projectName })
+    
     await sendContactEmail({
       name,
       email,
       message,
       projectName,
+      projectLocation,
+      projectStatus,
       isProjectInquiry: !!projectName
     })
 

@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import { render } from '@react-email/render'
 import ContactEmail from '@/emails/ContactEmail'
+import ProjectInterestConfirmationEmail from '@/emails/ProjectInterestConfirmationEmail'
 import NewsletterConfirmationEmail from '@/emails/NewsletterConfirmationEmail'
 import NewsletterWelcomeEmail from '@/emails/NewsletterWelcomeEmail'
 
@@ -15,6 +16,8 @@ export interface ContactEmailData {
   email: string
   message: string
   projectName?: string
+  projectLocation?: string
+  projectStatus?: string
   isProjectInquiry?: boolean
 }
 
@@ -27,7 +30,7 @@ export interface NewsletterEmailData {
 
 // Send contact form email
 export async function sendContactEmail(data: ContactEmailData) {
-  const { name, email, message, projectName, isProjectInquiry } = data
+  const { name, email, message, projectName, projectLocation, projectStatus, isProjectInquiry } = data
   
   const subject = isProjectInquiry && projectName
     ? `Projektanfrage: ${projectName} - ${name}`
@@ -43,13 +46,49 @@ export async function sendContactEmail(data: ContactEmailData) {
     })
   )
 
-  return await resend.emails.send({
-    from: 'NAMLA Website <no-reply@namla.de>',
+  // Send email to NAMLA
+  console.log('Attempting to send email to NAMLA with Resend...')
+  console.log('Resend API Key available:', !!process.env.RESEND_API_KEY)
+  
+  const namlaEmailResult = await resend.emails.send({
+    from: 'NAMLA Website <onboarding@resend.dev>',
     to: ['info@namla.de'],
     subject,
     html: emailHtml,
     replyTo: email,
   })
+  
+  console.log('NAMLA email result:', namlaEmailResult)
+
+  // If this is a project inquiry, also send confirmation email to the interested person
+  if (isProjectInquiry && projectName) {
+    try {
+      const confirmationHtml = render(
+        ProjectInterestConfirmationEmail({
+          name,
+          projectName,
+          projectLocation,
+          projectStatus
+        })
+      )
+
+      console.log('Sending confirmation email to:', email)
+      
+      const confirmationResult = await resend.emails.send({
+        from: 'NAMLA <onboarding@resend.dev>',
+        to: [email],
+        subject: `Vielen Dank für Ihr Interesse an ${projectName}`,
+        html: confirmationHtml,
+      })
+      
+      console.log('Confirmation email result:', confirmationResult)
+    } catch (error) {
+      // Don't fail the main email if confirmation email fails
+      console.error('Failed to send project interest confirmation email:', error)
+    }
+  }
+
+  return namlaEmailResult
 }
 
 // Send newsletter confirmation email
@@ -68,7 +107,7 @@ export async function sendNewsletterConfirmationEmail(data: NewsletterEmailData)
   )
 
   return await resend.emails.send({
-    from: 'NAMLA Newsletter <newsletter@namla.de>',
+    from: 'NAMLA Newsletter <onboarding@resend.dev>',
     to: [data.email],
     subject: 'Newsletter-Anmeldung bestätigen - NAMLA',
     html: emailHtml,
@@ -91,7 +130,7 @@ export async function sendNewsletterWelcomeEmail(data: NewsletterEmailData) {
   )
 
   return await resend.emails.send({
-    from: 'NAMLA Newsletter <newsletter@namla.de>',
+    from: 'NAMLA Newsletter <onboarding@resend.dev>',
     to: [data.email],
     subject: 'Willkommen beim NAMLA Newsletter!',
     html: emailHtml,

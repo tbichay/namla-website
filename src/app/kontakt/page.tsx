@@ -182,6 +182,22 @@ export default function ContactPage() {
                 ></div>
               </div>
 
+              {/* Privacy Notice */}
+              <div className="bg-stone-50 p-4 rounded-md">
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  Mit dem Absenden Ihrer Nachricht erklären Sie sich einverstanden, dass wir Ihre 
+                  personenbezogenen Daten zur Bearbeitung Ihrer Anfrage verwenden und speichern. 
+                  Die Daten werden vertraulich behandelt und nicht an Dritte weitergegeben. 
+                  Weitere Informationen zum Datenschutz finden Sie in unserer{' '}
+                  <a href="/datenschutz" className="text-amber-600 hover:text-amber-700 underline">
+                    Datenschutzerklärung
+                  </a>. Sie können Ihre Einwilligung jederzeit per E-Mail an{' '}
+                  <a href="mailto:info@namla.de" className="text-amber-600 hover:text-amber-700 underline">
+                    info@namla.de
+                  </a> widerrufen.
+                </p>
+              </div>
+
               {submitStatus === 'success' && (
                 <div className="p-4 bg-green-50 border border-green-200 text-green-800 rounded-sm">
                   Vielen Dank für Ihre Nachricht! Wir melden uns zeitnah bei Ihnen.
