@@ -6,7 +6,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const token = searchParams.get('token')
 
+    // Debug logging
+    console.log('Newsletter confirmation request:', {
+      url: request.url,
+      token: token,
+      searchParams: Object.fromEntries(searchParams.entries())
+    })
+
     if (!token) {
+      console.error('No token provided in newsletter confirmation request')
       return NextResponse.json(
         { error: 'Bestätigungstoken fehlt' },
         { status: 400 }

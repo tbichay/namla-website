@@ -106,7 +106,15 @@ export async function sendNewsletterConfirmationEmail(data: NewsletterEmailData)
     throw new Error('Confirmation token is required')
   }
 
-  const confirmationUrl = `${getBaseUrl()}/api/newsletter/confirm?token=${data.confirmationToken}`
+  const baseUrl = getBaseUrl()
+  const confirmationUrl = `${baseUrl}/api/newsletter/confirm?token=${data.confirmationToken}`
+  
+  // Debug logging
+  console.log('Newsletter confirmation email:', {
+    baseUrl,
+    confirmationUrl,
+    token: data.confirmationToken
+  })
   
   const emailElement = NewsletterConfirmationEmail({
     name: data.name,
@@ -156,12 +164,12 @@ export async function sendNewsletterWelcomeEmail(data: NewsletterEmailData) {
 
 // Helper function to get base URL
 function getBaseUrl(): string {
-  // In production, use VERCEL_URL with https
+  // Priority 1: In Vercel deployment, use VERCEL_URL with https (most reliable)
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`
   }
   
-  // Use NEXT_PUBLIC_SITE_URL if available
+  // Priority 2: Use NEXT_PUBLIC_SITE_URL if available (custom domain)
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL
   }
