@@ -319,7 +319,7 @@ export default function NewProjectPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Wohnfläche
+                  Wohnfläche m²
                 </label>
                 <Input
                   value={formData.details.livingSpace || ''}
@@ -329,7 +329,7 @@ export default function NewProjectPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Gesamtfläche
+                  Gesamtfläche m²
                 </label>
                 <Input
                   value={formData.details.totalSpace || ''}
@@ -339,7 +339,7 @@ export default function NewProjectPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Grundstücksgröße
+                  Grundstücksgröße m²
                 </label>
                 <Input
                   value={formData.details.plotSize || ''}

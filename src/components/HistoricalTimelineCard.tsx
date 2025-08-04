@@ -33,7 +33,11 @@ export default function HistoricalTimelineCard({
   const openLightbox = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setIsLightboxOpen(true)
+    
+    // Only open lightbox if there are valid images
+    if (validImages.length > 0) {
+      setIsLightboxOpen(true)
+    }
   }
 
   const closeLightbox = () => {
@@ -43,12 +47,14 @@ export default function HistoricalTimelineCard({
   return (
     <>
       <div 
-        className="flex-shrink-0 w-48 group cursor-pointer relative transition-all duration-300"
+        className={`flex-shrink-0 w-48 group relative transition-all duration-300 ${
+          validImages.length > 0 ? 'cursor-pointer' : 'cursor-default'
+        }`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={openLightbox}
         style={{ 
-          transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+          transform: isHovered && validImages.length > 0 ? 'scale(1.05)' : 'scale(1)',
           zIndex: isHovered ? 10 : 1
         }}
       >
@@ -81,7 +87,7 @@ export default function HistoricalTimelineCard({
             </div>
           )}
 
-          {/* Hover Preview Overlay */}
+          {/* Hover Preview Overlay - only for projects with multiple images */}
           {isHovered && validImages.length > 1 && (
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
               {/* Preview Thumbnails */}
@@ -118,7 +124,7 @@ export default function HistoricalTimelineCard({
             </div>
           )}
 
-          {/* Single Image Hint */}
+          {/* Single Image Hint - only for projects with exactly one image */}
           {isHovered && validImages.length === 1 && (
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent">
               <div className="absolute bottom-2 left-2 right-2">

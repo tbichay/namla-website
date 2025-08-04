@@ -371,7 +371,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 {/* Living Space */}
                 {project.details?.livingSpace && (
                   <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
-                    <span className="text-stone-500">Wohnfläche</span>
+                    <span className="text-stone-500">Wohnfläche m²</span>
                     <span className="font-medium text-stone-800">{project.details.livingSpace}</span>
                   </div>
                 )}
@@ -379,7 +379,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 {/* Total Space */}
                 {project.details?.totalSpace && (
                   <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
-                    <span className="text-stone-500">Gesamtfläche</span>
+                    <span className="text-stone-500">Gesamtfläche m²</span>
                     <span className="font-medium text-stone-800">{project.details.totalSpace}</span>
                   </div>
                 )}
@@ -419,7 +419,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 {/* Plot Size */}
                 {project.details?.plotSize && (
                   <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
-                    <span className="text-stone-500">Grundstück</span>
+                    <span className="text-stone-500">Grundstück m²</span>
                     <span className="font-medium text-stone-800">{project.details.plotSize}</span>
                   </div>
                 )}

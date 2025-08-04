@@ -772,7 +772,7 @@ interface UploadedDocument {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-2">
-                    Wohnfläche
+                    Wohnfläche m²
                   </label>
                   <Input
                     value={formData.details.livingSpace || ''}
@@ -782,7 +782,7 @@ interface UploadedDocument {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-2">
-                    Gesamtfläche
+                    Gesamtfläche m²
                   </label>
                   <Input
                     value={formData.details.totalSpace || ''}
@@ -792,7 +792,7 @@ interface UploadedDocument {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-2">
-                    Grundstücksgröße
+                    Grundstücksgröße m²
                   </label>
                   <Input
                     value={formData.details.plotSize || ''}

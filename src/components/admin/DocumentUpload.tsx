@@ -150,8 +150,17 @@ export default function DocumentUpload({
           })
 
           if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.error || 'Upload failed')
+            let errorMessage = 'Upload failed'
+            try {
+              const error = await response.json()
+              errorMessage = error.error || 'Upload failed'
+            } catch {
+              // If response is not JSON, get the text (likely HTML error page)
+              const errorText = await response.text()
+              console.error('Server returned non-JSON error:', errorText)
+              errorMessage = `Server error (${response.status}): ${response.statusText}`
+            }
+            throw new Error(errorMessage)
           }
 
           const result = await response.json()
