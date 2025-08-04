@@ -9,6 +9,14 @@ function ConfirmationContent() {
   const success = searchParams.get('success') === 'true'
   const message = searchParams.get('message') || ''
 
+  // Debug logging
+  console.log('Newsletter confirmation page params:', {
+    success,
+    message,
+    rawSuccess: searchParams.get('success'),
+    allParams: Object.fromEntries(searchParams.entries())
+  })
+
   return (
     <div className="bg-stone-50 min-h-screen">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-16 sm:py-24">

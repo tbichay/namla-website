@@ -23,19 +23,27 @@ export async function GET(request: NextRequest) {
 
     const result = await NewsletterService.confirm(token)
 
+    console.log('Newsletter confirmation result:', result)
+
     // Redirect to a confirmation page with success/error message
-    const redirectUrl = new URL('/newsletter/bestaetigt', request.url)
+    const baseUrl = new URL(request.url).origin
+    const redirectUrl = new URL('/newsletter/bestaetigt', baseUrl)
     redirectUrl.searchParams.set('success', result.success.toString())
     redirectUrl.searchParams.set('message', result.message)
+
+    console.log('Redirecting to:', redirectUrl.toString())
 
     return NextResponse.redirect(redirectUrl)
   } catch (error) {
     console.error('Newsletter confirmation error:', error)
     
     // Redirect to error page
-    const redirectUrl = new URL('/newsletter/bestaetigt', request.url)
+    const baseUrl = new URL(request.url).origin
+    const redirectUrl = new URL('/newsletter/bestaetigt', baseUrl)
     redirectUrl.searchParams.set('success', 'false')
     redirectUrl.searchParams.set('message', 'Fehler bei der Bestätigung')
+
+    console.log('Error redirect to:', redirectUrl.toString())
 
     return NextResponse.redirect(redirectUrl)
   }
