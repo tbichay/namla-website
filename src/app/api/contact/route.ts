@@ -55,8 +55,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Send email using Resend
-    console.log('Sending contact email:', { name, email, projectName, isProjectInquiry: !!projectName })
-    
     await sendContactEmail({
       name,
       email,
