@@ -30,6 +30,12 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'namla.de',
         pathname: '/api/media/**',
+      },
+      // CDN domain for R2 custom domain
+      {
+        protocol: 'https',
+        hostname: 'cdn.namla.de',
+        pathname: '/**',
       }
     ],
   },
