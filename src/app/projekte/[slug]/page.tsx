@@ -8,6 +8,7 @@ import Link from 'next/link'
 import MediaGallery from '@/components/MediaGallery'
 import Button from '@/components/ui/Button'
 import ProjectInterestForm from '@/components/ProjectInterestForm'
+import { getStatusLabel, formatPrice, shouldShowPrice } from '@/lib/project-display-utils'
 import { FileText, Download } from 'lucide-react'
 
 interface ProjectDetailPageProps {
@@ -301,14 +302,11 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 )}
 
                 {/* Price */}
-                {(project.priceFrom || project.priceExact) && (
+                {shouldShowPrice(project.priceFrom, project.priceExact) && (
                   <div className="flex justify-between py-2 border-b border-stone-200 text-sm sm:text-base">
                     <span className="text-stone-500">Preis</span>
                     <span className="font-medium text-stone-800">
-                      {project.priceExact 
-                        ? `€ ${Number(project.priceExact).toLocaleString('de-DE')}`
-                        : project.priceFrom
-                      }
+                      {formatPrice(project.priceFrom, project.priceExact)}
                     </span>
                   </div>
                 )}
@@ -332,7 +330,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 {/* Status */}
                 <div className="flex justify-between py-2 text-sm sm:text-base">
                   <span className="text-stone-500">Status</span>
-                  <span className="font-medium text-stone-800 capitalize">{project.status}</span>
+                  <span className="font-medium text-stone-800">{getStatusLabel(project.status)}</span>
                 </div>
               </div>
 

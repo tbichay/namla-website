@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { CurrentProject } from '@/types/project'
 import { adaptProjectsForPublic } from '@/lib/project-adapters'
+import { getStatusLabel, getStatusBadgeColor, formatPrice, shouldShowPrice } from '@/lib/project-display-utils'
 import type { Project as DbProject } from '@/lib/db'
 
 export default function CurrentProjectsCarousel() {
@@ -149,31 +150,18 @@ export default function CurrentProjectsCarousel() {
             <div className="flex items-center space-x-4 text-xs">
               <span>{currentProject.details.rooms}</span>
               <span>{currentProject.details.livingSpace}</span>
-              <span className="font-semibold">
-                {currentProject.priceFrom === '---' 
-                  ? 'Verkauft' 
-                  : `ab ${parseInt(currentProject.priceFrom).toLocaleString('de-DE')} €`
-                }
-              </span>
+              {shouldShowPrice(currentProject.priceFrom) && (
+                <span className="font-semibold">
+                  {formatPrice(currentProject.priceFrom)}
+                </span>
+              )}
             </div>
           </div>
 
           {/* Availability Badge */}
           <div className="flex flex-col items-end space-y-2">
-            <span className={`text-white px-3 py-1 rounded-full text-xs font-medium ${
-              currentProject.status === 'verfügbar'
-                ? 'bg-green-500'
-                : currentProject.status === 'verkauft'
-                ? 'bg-gray-500'
-                : currentProject.status === 'in_planung'
-                ? 'bg-yellow-500'
-                : currentProject.status === 'in_bau'
-                ? 'bg-blue-500'
-                : currentProject.status === 'fertiggestellt'
-                ? 'bg-purple-500'
-                : 'bg-stone-500' // fallback
-            }`}>
-              {currentProject.status.toUpperCase()}
+            <span className={`text-white px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(currentProject.status)}`}>
+              {getStatusLabel(currentProject.status)}
             </span>
             <Link 
               href={`/projekte/${currentProject.id}`}

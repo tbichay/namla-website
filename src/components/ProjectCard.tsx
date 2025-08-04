@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { CurrentProject } from '@/types/project'
+import { getStatusLabel, getStatusColor, formatPrice, shouldShowPrice } from '@/lib/project-display-utils'
 
 interface ProjectCardProps {
   project: CurrentProject
@@ -27,21 +28,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
           <h3 className="text-lg sm:text-xl font-bold text-stone-800 leading-tight">{project.name}</h3>
           <span
-            className={`self-start px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium whitespace-nowrap rounded-full ${
-              project.status === 'verfügbar'
-                ? 'bg-green-100 text-green-800'
-                : project.status === 'verkauft'
-                ? 'bg-gray-100 text-gray-600'
-                : project.status === 'in_planung'
-                ? 'bg-yellow-100 text-yellow-800'
-                : project.status === 'in_bau'
-                ? 'bg-blue-100 text-blue-800'
-                : project.status === 'fertiggestellt'
-                ? 'bg-purple-100 text-purple-800'
-                : 'bg-stone-100 text-stone-600' // fallback
-            }`}
+            className={`self-start px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium whitespace-nowrap rounded-full ${getStatusColor(project.status)}`}
           >
-            {project.status}
+            {getStatusLabel(project.status)}
           </span>
         </div>
         
@@ -52,9 +41,11 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         </p>
         
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
-          <p className="text-base sm:text-lg font-semibold text-stone-800">
-            {project.priceFrom === '---' ? 'Verkauft' : `ab ${parseInt(project.priceFrom).toLocaleString('de-DE')} €`}
-          </p>
+          {shouldShowPrice(project.priceFrom) && (
+            <p className="text-base sm:text-lg font-semibold text-stone-800">
+              {formatPrice(project.priceFrom)}
+            </p>
+          )}
           <Link
             href={`/projekte/${project.id}`}
             className="text-amber-600 hover:text-amber-700 transition-colors font-medium text-sm sm:text-base self-start sm:self-auto focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 rounded-sm"
