@@ -10,11 +10,64 @@ import Button from '@/components/ui/Button'
 import ProjectInterestForm from '@/components/ProjectInterestForm'
 import { getStatusLabel, formatPrice, shouldShowPrice } from '@/lib/project-display-utils'
 import { FileText, Download } from 'lucide-react'
+import { Metadata } from 'next'
 
 interface ProjectDetailPageProps {
   params: Promise<{
     slug: string
   }>
+}
+
+// Generate metadata for the page
+export async function generateMetadata({ params }: ProjectDetailPageProps): Promise<Metadata> {
+  const { slug } = await params
+  
+  try {
+    // Fetch the project data for metadata
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/projects/${slug}`)
+    
+    if (!response.ok) {
+      return {
+        title: 'Projekt nicht gefunden | NAMLA',
+        description: 'Das angeforderte Projekt konnte nicht gefunden werden.'
+      }
+    }
+    
+    const project = await response.json()
+    
+    // Generate meta description
+    let metaDescription = ''
+    if (project.metaDescription) {
+      metaDescription = project.metaDescription
+    } else if (project.shortDescription) {
+      metaDescription = project.shortDescription.length > 160 
+        ? project.shortDescription.substring(0, 157) + '...'
+        : project.shortDescription
+    } else if (project.description) {
+      metaDescription = project.description.length > 160
+        ? project.description.substring(0, 157) + '...'
+        : project.description
+    } else {
+      metaDescription = `${project.name} in ${project.location} | NAMLA`
+    }
+    
+    return {
+      title: `${project.name} - ${project.location} | NAMLA`,
+      description: metaDescription,
+      openGraph: {
+        title: `${project.name} - ${project.location}`,
+        description: metaDescription,
+        images: project.media && project.media.length > 0 
+          ? [{ url: project.media[0].url, alt: project.name }]
+          : []
+      }
+    }
+  } catch (error) {
+    return {
+      title: 'Projekt | NAMLA',
+      description: 'Projekt Details von NAMLA'
+    }
+  }
 }
 
 interface ProjectDetails {
@@ -157,6 +210,24 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const isHistoricalProject = (project: ProjectData) => 
     project.status === 'fertiggestellt'
 
+  // Helper function to generate meta description
+  const getMetaDescription = (project: ProjectData): string => {
+    if (project.metaDescription) {
+      return project.metaDescription
+    }
+    if (project.shortDescription) {
+      return project.shortDescription.length > 160 
+        ? project.shortDescription.substring(0, 157) + '...'
+        : project.shortDescription
+    }
+    if (project.description) {
+      return project.description.length > 160
+        ? project.description.substring(0, 157) + '...'
+        : project.description
+    }
+    return `${project.name} in ${project.location} - ${getStatusLabel(project.status)} | NAMLA`
+  }
+
   // Sort media by sortOrder and isMainImage, and add projectId for video thumbnails
   const sortedMedia = project.media
     .sort((a, b) => {
@@ -222,9 +293,28 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             {/* Project Description */}
             {project.description && (
               <div className="mt-6 sm:mt-8 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-bold text-stone-800 mb-4">Beschreibung</h2>
-                <div className="text-stone-600 leading-relaxed text-sm sm:text-base lg:text-lg whitespace-pre-wrap">
-                  {project.description}
+                <h2 className="text-xl sm:text-2xl font-bold text-stone-800 mb-4 sm:mb-6">
+                  {project.shortDescription && project.shortDescription !== project.description 
+                    ? 'Detaillierte Beschreibung' 
+                    : 'Beschreibung'
+                  }
+                </h2>
+                <div className="prose prose-stone max-w-none">
+                  <div className="text-stone-600 leading-relaxed text-sm sm:text-base lg:text-lg whitespace-pre-line">
+                    {project.description}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Short Description as standalone if no main description */}
+            {!project.description && project.shortDescription && (
+              <div className="mt-6 sm:mt-8 px-2 sm:px-0">
+                <h2 className="text-xl sm:text-2xl font-bold text-stone-800 mb-4 sm:mb-6">Kurzbeschreibung</h2>
+                <div className="prose prose-stone max-w-none">
+                  <div className="text-stone-600 leading-relaxed text-sm sm:text-base lg:text-lg">
+                    {project.shortDescription}
+                  </div>
                 </div>
               </div>
             )}
@@ -435,12 +525,12 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                   </div>
                 )}
 
-                {/* Description */}
-                {project.description && (
+                {/* Short Description as Summary */}
+                {project.shortDescription && project.shortDescription !== project.description && (
                   <div className="py-2 border-b border-stone-200 text-sm sm:text-base">
-                    <span className="text-stone-500 mb-2 block">Beschreibung</span>
-                    <p className="text-stone-800 text-sm leading-relaxed whitespace-pre-line">
-                      {project.description}
+                    <span className="text-stone-500 mb-2 block">Zusammenfassung</span>
+                    <p className="text-stone-800 text-sm leading-relaxed">
+                      {project.shortDescription}
                     </p>
                   </div>
                 )}

@@ -36,9 +36,11 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         
         <p className="text-stone-500 mb-3 text-sm sm:text-base">{project.location}</p>
         
-        <p className="text-stone-600 mb-4 leading-relaxed text-sm sm:text-base line-clamp-3">
-          {project.description}
-        </p>
+        {(project.shortDescription || project.description) && (
+          <p className="text-stone-600 mb-4 leading-relaxed text-sm sm:text-base line-clamp-3">
+            {project.shortDescription || project.description}
+          </p>
+        )}
         
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
           {shouldShowPrice(project.priceFrom) && (

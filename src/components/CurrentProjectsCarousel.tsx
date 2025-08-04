@@ -147,6 +147,11 @@ export default function CurrentProjectsCarousel() {
               {currentProject.name}
             </h3>
             <p className="text-sm opacity-90 mb-2">{currentProject.location}</p>
+            {(currentProject.shortDescription || currentProject.description) && (
+              <p className="text-xs opacity-80 mb-3 line-clamp-2 leading-relaxed">
+                {currentProject.shortDescription || (currentProject.description?.length > 100 ? currentProject.description.substring(0, 100) + '...' : currentProject.description)}
+              </p>
+            )}
             <div className="flex items-center space-x-4 text-xs">
               <span>{currentProject.details.rooms}</span>
               <span>{currentProject.details.livingSpace}</span>
