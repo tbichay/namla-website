@@ -268,7 +268,7 @@ export default function ContactPage() {
             <div className="bg-white rounded-lg shadow-sm p-6 sm:p-8">
               <h3 className="text-lg sm:text-xl font-semibold text-stone-800 mb-4">Unser Standort</h3>
               <Map 
-                coordinates={{ lat: 48.4010, lng: 9.9876 }}
+                coordinates={{ lat: 48.40385689264704, lng: 9.991081889985397 }}
                 zoom={16}
                 height="320px"
                 address="NAMLA GmbH, Zeitblomstr. 31/2, 89073 Ulm"

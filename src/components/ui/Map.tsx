@@ -16,7 +16,7 @@ interface MapProps {
 export default function Map({ 
   className = '', 
   address = 'NAMLA GmbH, Zeitblomstr. 31/2, 89073 Ulm',
-  coordinates = { lat: 48.4010, lng: 9.9876 }, // Ulm city center coordinates
+  coordinates = { lat: 48.40385689264704, lng: 9.991081889985397 }, // NAMLA office coordinates
   zoom = 15,
   height = '300px'
 }: MapProps) {
